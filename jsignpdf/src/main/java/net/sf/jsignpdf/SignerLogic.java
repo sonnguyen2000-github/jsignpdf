@@ -198,7 +198,7 @@ public class SignerLogic implements Runnable {
                 }
                 tmpPdfVersion = requiredPdfVersionForGivenHash;
                 LOGGER.info(RES.get("console.updateVersion",
-                        new String[] { String.valueOf(inputPdfVersion), String.valueOf(tmpPdfVersion) }));
+                        new String[]{String.valueOf(inputPdfVersion), String.valueOf(tmpPdfVersion)}));
             }
 
             final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
@@ -206,8 +206,7 @@ public class SignerLogic implements Runnable {
                 // we are not in append mode, let's remove existing signatures
                 // (otherwise we're getting to troubles)
                 final AcroFields acroFields = stp.getAcroFields();
-                @SuppressWarnings("unchecked")
-                final List<String> sigNames = acroFields.getSignatureNames();
+                @SuppressWarnings("unchecked") final List<String> sigNames = acroFields.getSignatureNames();
                 for (String sigName : sigNames) {
                     acroFields.removeField(sigName);
                 }
@@ -235,7 +234,7 @@ public class SignerLogic implements Runnable {
                             LOGGER.severe(RES.get("console.pdfEncError.cantUseCertificate", encCert.getSubjectDN().getName()));
                             return false;
                         }
-                        stp.setEncryption(new Certificate[] { encCert }, new int[] { tmpRight }, PdfWriter.ENCRYPTION_AES_128);
+                        stp.setEncryption(new Certificate[]{encCert}, new int[]{tmpRight}, PdfWriter.ENCRYPTION_AES_128);
                         break;
                     default:
                         LOGGER.severe(RES.get("console.unsupportedEncryptionType"));
@@ -354,14 +353,14 @@ public class SignerLogic implements Runnable {
             final CRLInfo crlInfo = new CRLInfo(options, chain);
 
             // CRLs are stored twice in PDF c.f.
-            // PdfPKCS7.getAuthenticatedAttributeBytes
+            // net.sf.jsignpdf.CustomPdfPKCS7.getAuthenticatedAttributeBytes
             final int contentEstimated = (int) (Constants.DEFVAL_SIG_SIZE + 2L * crlInfo.getByteCount());
             final Map<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
             exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
             sap.preClose(exc);
 
             String provider = PKCS11Utils.getProviderNameForKeystoreType(options.getKsType());
-            PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), provider, false);
+            CustomPdfPKCS7 sgn = new CustomPdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), provider, false);
             InputStream data = sap.getRangeStream();
             final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm.getAlgorithmName());
             byte buf[] = new byte[8192];
@@ -439,6 +438,8 @@ public class SignerLogic implements Runnable {
             fout.close();
             fout = null;
             finished = true;
+
+            /*padded sig*/
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {
@@ -461,7 +462,7 @@ public class SignerLogic implements Runnable {
     /**
      * Validates if input and output files are valid for signing.
      *
-     * @param inFile input file
+     * @param inFile  input file
      * @param outFile output file
      * @return true if valid, false otherwise
      */

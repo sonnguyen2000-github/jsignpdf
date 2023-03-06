@@ -245,6 +245,10 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         if (line.hasOption("apiKey")) {
             setApiKey(line.getOptionValue("apiKey"));
         }
+        /*CECA Sercet Key*/
+        if (line.hasOption("secretKey")) {
+            setSecretKey(line.getOptionValue("secretKey"));
+        }
 
         setGui(line.hasOption(ARG_GUI));
         if (ArrayUtils.isNotEmpty(files)) {
@@ -439,8 +443,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_GUI).withDescription(RES.get("hlp.gui")).create());
 
-        OPTS.addOption(OptionBuilder.withLongOpt("apiKey").withDescription("API KEY of CeCA").hasArg()
+        OPTS.addOption(OptionBuilder.withLongOpt("apiKey").withDescription("Required: API KEY of CeCA").hasArg()
                 .withArgName("apiKey").create());
+
+        OPTS.addOption(OptionBuilder.withLongOpt("secretKey").withDescription("Required: Secret KEY of CeCA").hasArg()
+                .withArgName("secretKey").create());
     }
 
     /**

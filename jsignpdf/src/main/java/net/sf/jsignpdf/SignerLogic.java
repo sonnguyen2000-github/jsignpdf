@@ -423,8 +423,14 @@ public class SignerLogic implements Runnable {
 
             /*set API Key*/
             if (options.hasApiKey()) {
-                LOGGER.info("CeCA API KEY:\n");
-                LOGGER.info(options.getApiKey());
+                assert tsc != null;
+                tsc.setApiKey(options.getApiKey());
+            }
+
+            /*set Secret Key*/
+            if (options.hasSecretKey()) {
+                assert tsc != null;
+                tsc.setSecretKey(options.getSecretKey());
             }
 
             byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
@@ -509,6 +515,16 @@ public class SignerLogic implements Runnable {
             return false;
         }
         return true;
+    }
+
+    private static final String HEXES = "0123456789ABCDEF";
+
+    static String getHex(byte[] raw) {
+        final StringBuilder hex = new StringBuilder(2 * raw.length);
+        for (final byte b : raw) {
+            hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
+        }
+        return hex.toString();
     }
 
 }

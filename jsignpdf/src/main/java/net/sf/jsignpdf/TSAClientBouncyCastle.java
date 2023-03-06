@@ -49,25 +49,27 @@
 
 package net.sf.jsignpdf;
 
-import com.lowagie.text.error_messages.MessageLocalization;
 import com.lowagie.text.pdf.TSAClient;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.tsp.*;
-import sun.net.www.http.HttpClient;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Base64;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Time Stamp Authority Client interface implementation using Bouncy Castle
@@ -103,7 +105,9 @@ public class TSAClientBouncyCastle implements TSAClient {
 
     public String apiKey;
 
-    public static String ServiceType = "2";
+    public String sercetKey;
+
+    public final static String SERVICE_TYPE = "2";
 
     /**
      * Creates an instance of a TSAClient that will use BouncyCastle.
@@ -138,8 +142,7 @@ public class TSAClientBouncyCastle implements TSAClient {
      * @param password      String - password
      * @param tokSzEstimate int - estimated size of received time stamp token (DER encoded)
      */
-    public TSAClientBouncyCastle(String url, String username, String password,
-                                 int tokSzEstimate) {
+    public TSAClientBouncyCastle(String url, String username, String password, int tokSzEstimate) {
         this.tsaURL = url;
         this.tsaUsername = username;
         this.tsaPassword = password;
@@ -186,8 +189,7 @@ public class TSAClientBouncyCastle implements TSAClient {
      * @see TSAClient#getTimeStampToken(com.lowagie.text.pdf.PdfPKCS7,
      * byte[])
      */
-    public byte[] getTimeStampToken(PdfPKCS7 caller, byte[] imprint)
-            throws Exception {
+    public byte[] getTimeStampToken(PdfPKCS7 caller, byte[] imprint) throws Exception {
         return getTimeStampToken(imprint);
     }
 
@@ -266,12 +268,70 @@ public class TSAClientBouncyCastle implements TSAClient {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept", "application/json");
 
         /*set API KEY*/
-        con.setRequestProperty("X-API-KEY", "");
+        con.setRequestProperty("X-API-KEY", this.apiKey);
+        con.setRequestProperty("ServiceType", SERVICE_TYPE);
 
-        return respBytes;
+        System.out.println(con.getRequestProperties().toString());
 
+        con.setDoOutput(true);
+
+        /*data body*/
+        UUID uuid = UUID.randomUUID();
+        Date today = new Date();
+        LocalDateTime date = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMM");
+        MessageDigest digestSHA256 = MessageDigest.getInstance("SHA-256");
+
+
+        String jsonContent = "{\"data\":{\"digest\":\"" + SignerLogic.getHex(imprint) + "\",";
+        jsonContent += "\"algorithm\":\"" + this.getDigestName() + "\"}}";
+
+        String jsonInfo = "{\"version\":\"1.0.0\",\"senderId\":\"C10016ICORP\",\"receiverId\":\"P10001EVERIFY\",\"messageType\":1,";
+        jsonInfo += "\"sendDate\":" + Date.from(date.toInstant(ZoneOffset.UTC)).getTime() + ",";
+        jsonInfo += "\"messageId\":\"" + ("C10016ICORP" + date.format(formatter) + uuid.toString()) + "\"}";
+
+        /*hased info*/
+        byte[] encodedhash = digestSHA256.digest(jsonInfo.getBytes(StandardCharsets.UTF_8));
+        String A = SignerLogic.getHex(encodedhash).toUpperCase();
+
+        /*hashed content*/
+        encodedhash = digestSHA256.digest(jsonContent.getBytes(StandardCharsets.UTF_8));
+        String B = SignerLogic.getHex(encodedhash).toUpperCase();
+
+        String C = A + "." + B;
+
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secret_key = new SecretKeySpec(this.sercetKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        sha256_HMAC.init(secret_key);
+
+
+        String signature = SignerLogic.getHex(sha256_HMAC.doFinal(C.getBytes(StandardCharsets.UTF_8))).toUpperCase();
+
+        String jsonInputString = "{\"content\":" + jsonContent + ",";
+        jsonInputString += "\"info\":" + jsonInfo + ",";
+        jsonInputString += "\"signature\":\"" + signature + "\"}";
+
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+
+        String responseLine = "";
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder response = new StringBuilder();
+
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            System.out.println("CeCA Timestamp response:");
+            System.out.println(response);
+        }
+
+        return responseLine.getBytes();
     }
 
     /**
@@ -291,16 +351,14 @@ public class TSAClientBouncyCastle implements TSAClient {
         tsaConnection.setDoInput(true);
         tsaConnection.setDoOutput(true);
         tsaConnection.setUseCaches(false);
-        tsaConnection.setRequestProperty("Content-Type",
-                "application/timestamp-query");
+        tsaConnection.setRequestProperty("Content-Type", "application/timestamp-query");
         // tsaConnection.setRequestProperty("Content-Transfer-Encoding",
         // "base64");
         tsaConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
 
         if (isNotEmpty(tsaUsername)) {
             String userPassword = tsaUsername + ":" + tsaPassword;
-            tsaConnection.setRequestProperty("Authorization", "Basic "
-                    + new String(Base64.getEncoder().encode(userPassword.getBytes())));
+            tsaConnection.setRequestProperty("Authorization", "Basic " + new String(Base64.getEncoder().encode(userPassword.getBytes())));
         }
         OutputStream out = tsaConnection.getOutputStream();
         out.write(requestBytes);
@@ -389,5 +447,9 @@ public class TSAClientBouncyCastle implements TSAClient {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.sercetKey = secretKey;
     }
 }

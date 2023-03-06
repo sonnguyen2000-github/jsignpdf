@@ -41,7 +41,6 @@ import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.PropertyProvider;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.CryptoException;
 
@@ -134,6 +133,7 @@ public class BasicSignerOptions {
     private String[] cmdLine;
 
     public String apiKey;
+    private String secretKey;
 
     /**
      * Loads options from PropertyProvider
@@ -1212,4 +1212,15 @@ public class BasicSignerOptions {
         return this.apiKey != null;
     }
 
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public String getSecretKey() {
+        return this.secretKey;
+    }
+
+    public boolean hasSecretKey() {
+        return this.secretKey != null;
+    }
 }

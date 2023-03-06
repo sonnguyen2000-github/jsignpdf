@@ -78,14 +78,14 @@ import com.lowagie.text.pdf.OcspClientBouncyCastle;
 import com.lowagie.text.pdf.PdfDate;
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfName;
-import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfSignature;
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfString;
 import com.lowagie.text.pdf.PdfWriter;
-import com.lowagie.text.pdf.TSAClientBouncyCastle;
+//import com.lowagie.text.pdf.TSAClientBouncyCastle;
+//import com.lowagie.text.pdf.PdfPKCS7;
 
 /**
  * Main logic of signer application. It uses iText to create signature in PDF.
@@ -285,11 +285,11 @@ public class SignerLogic implements Runnable {
                 LOGGER.info(RES.get("console.setImageScale"));
                 sap.setImageScale(options.getBgImgScale());
                 LOGGER.info(RES.get("console.setL2Text"));
-                String signer = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN");
+                String signer = com.lowagie.text.pdf.PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN");
                 if (StringUtils.isNotEmpty(options.getSignerName())) {
                     signer = options.getSignerName();
                 }
-                final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
+                final String certificate = com.lowagie.text.pdf.PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
                 final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDate().getTime());
                 if (options.getL2Text() != null) {
                     final Map<String, String> replacements = new HashMap<String, String>();
@@ -360,7 +360,7 @@ public class SignerLogic implements Runnable {
             sap.preClose(exc);
 
             String provider = PKCS11Utils.getProviderNameForKeystoreType(options.getKsType());
-            CustomPdfPKCS7 sgn = new CustomPdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), provider, false);
+            PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), provider, false);
             InputStream data = sap.getRangeStream();
             final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm.getAlgorithmName());
             byte buf[] = new byte[8192];
@@ -373,7 +373,7 @@ public class SignerLogic implements Runnable {
             byte[] ocsp = null;
             if (options.isOcspEnabledX() && chain.length >= 2) {
                 LOGGER.info(RES.get("console.getOCSPURL"));
-                String url = PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
+                String url = com.lowagie.text.pdf.PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
                 if (StringUtils.isEmpty(url)) {
                     // get from options
                     LOGGER.info(RES.get("console.noOCSPURL"));
@@ -440,6 +440,23 @@ public class SignerLogic implements Runnable {
             finished = true;
 
             /*padded sig*/
+            System.out.println("Padded Sig:");
+            System.out.println(Arrays.toString(paddedSig));
+
+            System.out.println("Sign Date:");
+            System.out.println(sgn.getSignDate());
+
+            System.out.println("Digest Algorithm:");
+            System.out.println(sgn.getDigestAlgorithm());
+
+            System.out.println("Hash Algorithm:");
+            System.out.println(sgn.getHashAlgorithm());
+
+            System.out.println("Digest:");
+            System.out.println(Arrays.toString(sgn.digest));
+
+            System.out.println("Sig Attr:");
+            System.out.println(Arrays.toString(sgn.sigAttr));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {

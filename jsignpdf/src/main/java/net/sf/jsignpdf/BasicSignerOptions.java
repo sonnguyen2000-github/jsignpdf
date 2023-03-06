@@ -133,6 +133,8 @@ public class BasicSignerOptions {
 
     private String[] cmdLine;
 
+    public String apiKey;
+
     /**
      * Loads options from PropertyProvider
      */
@@ -1196,6 +1198,18 @@ public class BasicSignerOptions {
 
     protected void setCmdLine(String[] cmdLine) {
         this.cmdLine = cmdLine;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getApiKey() {
+        return this.apiKey;
+    }
+
+    public Boolean hasApiKey() {
+        return this.apiKey != null;
     }
 
 }

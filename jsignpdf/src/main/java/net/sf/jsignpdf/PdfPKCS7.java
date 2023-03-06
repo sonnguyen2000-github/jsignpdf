@@ -140,7 +140,7 @@ public class PdfPKCS7 {
     private X509Certificate signCert;
     public byte[] digest;
     private MessageDigest messageDigest;
-    private String digestAlgorithm, digestEncryptionAlgorithm;
+    public String digestAlgorithm, digestEncryptionAlgorithm;
     private Signature sig;
     private transient PrivateKey privKey;
     private byte[] RSAdata;

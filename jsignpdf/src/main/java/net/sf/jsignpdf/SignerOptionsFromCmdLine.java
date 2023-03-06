@@ -79,6 +79,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
     /**
      * Parses options provided as command line arguments.
+     *
      * @throws ParseException
      */
     @Override
@@ -239,6 +240,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setProxyHost(line.getOptionValue(ARG_PROXY_HOST_LONG));
         if (line.hasOption(ARG_PROXY_PORT_LONG))
             setProxyPort(getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
+
+        /*CECA API KEY*/
+        if (line.hasOption("apiKey")) {
+            setApiKey(line.getOptionValue("apiKey"));
+        }
 
         setGui(line.hasOption(ARG_GUI));
         if (ArrayUtils.isNotEmpty(files)) {
@@ -432,6 +438,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .withLongOpt(ARG_PROXY_PORT_LONG).hasArg().withType(Number.class).withArgName("port").create());
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_GUI).withDescription(RES.get("hlp.gui")).create());
+
+        OPTS.addOption(OptionBuilder.withLongOpt("apiKey").withDescription("API KEY of CeCA").hasArg()
+                .withArgName("apiKey").create());
     }
 
     /**

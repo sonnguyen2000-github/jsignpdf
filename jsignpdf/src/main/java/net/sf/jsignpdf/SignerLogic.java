@@ -47,11 +47,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 import net.sf.jsignpdf.crl.CRLInfo;
@@ -401,6 +397,9 @@ public class SignerLogic implements Runnable {
                 sgn.update(sh, 0, sh.length);
             }
 
+            /*update Sign Date*/
+            sgn.setSignDate(Calendar.getInstance());
+
             TSAClientBouncyCastle tsc = null;
             if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {
                 LOGGER.info(RES.get("console.creatingTsaClient"));
@@ -421,6 +420,13 @@ public class SignerLogic implements Runnable {
                     tsc.setPolicy(policyOid);
                 }
             }
+
+            /*set API Key*/
+            if (options.hasApiKey()) {
+                LOGGER.info("CeCA API KEY:\n");
+                LOGGER.info(options.getApiKey());
+            }
+
             byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
 
             if (contentEstimated + 2 < encodedSig.length) {
@@ -444,13 +450,16 @@ public class SignerLogic implements Runnable {
             System.out.println(Arrays.toString(paddedSig));
 
             System.out.println("Sign Date:");
-            System.out.println(sgn.getSignDate());
+            System.out.println(sgn.getSignDate().getTime());
 
             System.out.println("Digest Algorithm:");
             System.out.println(sgn.getDigestAlgorithm());
 
             System.out.println("Hash Algorithm:");
             System.out.println(sgn.getHashAlgorithm());
+
+            System.out.println("Signature Algorithm:");
+            System.out.println(PdfPKCS7.getAlgorithm(sgn.digestEncryptionAlgorithm));
 
             System.out.println("Digest:");
             System.out.println(Arrays.toString(sgn.digest));

@@ -76,10 +76,7 @@ public class Signer {
      */
     private static void printHelp() {
         final HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", RES.get("hlp.header"),
-                SignerOptionsFromCmdLine.OPTS, NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE
-                        + StringUtils.repeat("-", 80) + NEW_LINE + RES.get("hlp.footer.examples"),
-                true);
+        formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", RES.get("hlp.header"), SignerOptionsFromCmdLine.OPTS, NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE + StringUtils.repeat("-", 80) + NEW_LINE + RES.get("hlp.footer.examples"), true);
     }
 
     /**
@@ -93,6 +90,16 @@ public class Signer {
         if (args != null && args.length > 0) {
             tmpOpts = new SignerOptionsFromCmdLine();
             parseCommandLine(args, tmpOpts);
+        }
+
+        assert tmpOpts != null;
+        if (tmpOpts.isExtractOnly()) {
+            try {
+                SignerLogic.extract(tmpOpts.getInFile());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return;
         }
 
         try {
@@ -134,13 +141,11 @@ public class Signer {
             }
             if (tmpOpts.isGui()) {
                 showGui = true;
-            } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
-                    || (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
+            } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles()) || (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
                 signFiles(tmpOpts);
                 exit(0);
             } else {
-                final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores()
-                        || tmpOpts.isListKeys();
+                final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores() || tmpOpts.isListKeys();
                 if (!tmpCommand) {
                     // no valid command provided - print help and exit
                     printHelp();
@@ -166,7 +171,7 @@ public class Signer {
     /**
      * Writes info about security providers to the {@link Logger} instance. The log-level for messages is FINER.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static void traceInfo() {
         if (LOGGER.isLoggable(Level.FINER)) {
             try {
@@ -216,20 +221,19 @@ public class Signer {
             File[] inputFiles;
             if (StringUtils.containsAny(wildcardFile.getName(), '*', '?')) {
                 final File inputFolder = wildcardFile.getAbsoluteFile().getParentFile();
-                final FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE,
-                        new WildcardFileFilter(wildcardFile.getName()));
+                final FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(wildcardFile.getName()));
                 inputFiles = inputFolder.listFiles(fileFilter);
                 if (inputFiles == null) {
                     continue;
                 }
             } else {
-                inputFiles = new File[] { wildcardFile };
+                inputFiles = new File[]{wildcardFile};
             }
             for (File inputFile : inputFiles) {
                 final String tmpInFile = inputFile.getPath();
                 if (!inputFile.canRead()) {
                     failedCount++;
-                    System.err.println(RES.get("file.notReadable", new String[] { tmpInFile }));
+                    System.err.println(RES.get("file.notReadable", new String[]{tmpInFile}));
                     continue;
                 }
                 anOpts.setInFile(tmpInFile);

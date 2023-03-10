@@ -49,11 +49,17 @@
 
 package net.sf.jsignpdf;
 
+import com.lowagie.text.error_messages.MessageLocalization;
 import com.lowagie.text.pdf.TSAClient;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.tsp.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
@@ -68,6 +74,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -175,7 +182,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 
     @Override
     public byte[] getTimeStampToken(com.lowagie.text.pdf.PdfPKCS7 caller, byte[] imprint) throws Exception {
-        return getTimeStampToken(imprint);
+        byte[] respBytes = null;
+        return respBytes;
     }
 
     /**
@@ -190,7 +198,7 @@ public class TSAClientBouncyCastle implements TSAClient {
      * byte[])
      */
     public byte[] getTimeStampToken(PdfPKCS7 caller, byte[] imprint) throws Exception {
-        return getTimeStampToken(imprint);
+        return getTimeStampToken(imprint, caller);
     }
 
     /**
@@ -200,138 +208,138 @@ public class TSAClientBouncyCastle implements TSAClient {
      * @return the timestamp token
      * @throws Exception on error
      */
-    protected byte[] getTimeStampToken(byte[] imprint) throws Exception {
-//    byte[] respBytes = null;
-//    try {
-//      // Setup the time stamp request
-//      TimeStampRequestGenerator tsqGenerator = new TimeStampRequestGenerator();
-//      tsqGenerator.setCertReq(true);
-//      if (isNotEmpty(policy)) {
-//        tsqGenerator.setReqPolicy(new ASN1ObjectIdentifier(policy));
-//      }
-//      BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
-//      ASN1ObjectIdentifier digestOid = X509ObjectIdentifiers.id_SHA1;
-//      if (isNotEmpty(digestName)) {
-//          digestOid = new ASN1ObjectIdentifier(com.lowagie.text.pdf.PdfPKCS7.getDigestOid(digestName));
-//      }
-//      TimeStampRequest request = tsqGenerator.generate(digestOid, imprint, nonce);
-//      byte[] requestBytes = request.getEncoded();
-//
-//      // Call the communications layer
-//      respBytes = getTSAResponse(requestBytes);
-//
-//      // Handle the TSA response
-//      TimeStampResponse response = new TimeStampResponse(respBytes);
-//
-//      // validate communication level attributes (RFC 3161 PKIStatus)
-//      response.validate(request);
-//      PKIFailureInfo failure = response.getFailInfo();
-//      int value = (failure == null) ? 0 : failure.intValue();
-//      if (value != 0) {
-//        // @todo: Translate value of 15 error codes defined by
-//        // PKIFailureInfo to string
-//        throw new Exception(MessageLocalization.getComposedMessage(
-//            "invalid.tsa.1.response.code.2", tsaURL, String.valueOf(value)));
-//      }
-//      // @todo: validate the time stap certificate chain (if we want
-//      // assure we do not sign using an invalid timestamp).
-//
-//      // extract just the time stamp token (removes communication status
-//      // info)
-//      TimeStampToken tsToken = response.getTimeStampToken();
-//      if (tsToken == null) {
-//        throw new Exception(MessageLocalization.getComposedMessage(
-//            "tsa.1.failed.to.return.time.stamp.token.2", tsaURL,
-//            response.getStatusString()));
-//      }
-//      TimeStampTokenInfo info = tsToken.getTimeStampInfo(); // to view
-//                                                            // details
-//      byte[] encoded = tsToken.getEncoded();
-//      long stop = System.currentTimeMillis();
-//
-//      // Update our token size estimate for the next call (padded to be
-//      // safe)
-//      this.tokSzEstimate = encoded.length + 32;
-//      return encoded;
-//    } catch (Exception e) {
-//      throw e;
-//    } catch (Throwable t) {
-//      throw new Exception(MessageLocalization.getComposedMessage(
-//          "failed.to.get.tsa.response.from.1", tsaURL), t);
-//    }
+    protected byte[] getTimeStampToken(byte[] imprint, PdfPKCS7 caller) throws Exception {
         byte[] respBytes = null;
-        String httpsURL = this.getTsaURL();
-
-        URL url = new URL(httpsURL);
-
-        /*set request*/
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Accept", "application/json");
-
-        /*set API KEY*/
-        con.setRequestProperty("X-API-KEY", this.apiKey);
-        con.setRequestProperty("ServiceType", SERVICE_TYPE);
-
-        System.out.println(con.getRequestProperties().toString());
-
-        con.setDoOutput(true);
-
-        /*data body*/
-        UUID uuid = UUID.randomUUID();
-        Date today = new Date();
-        LocalDateTime date = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMM");
-        MessageDigest digestSHA256 = MessageDigest.getInstance("SHA-256");
-
-
-        String jsonContent = "{\"data\":{\"digest\":\"" + SignerLogic.getHex(imprint) + "\",";
-        jsonContent += "\"algorithm\":\"" + this.getDigestName() + "\"}}";
-
-        String jsonInfo = "{\"version\":\"1.0.0\",\"senderId\":\"C10016ICORP\",\"receiverId\":\"P10001EVERIFY\",\"messageType\":1,";
-        jsonInfo += "\"sendDate\":" + Date.from(date.toInstant(ZoneOffset.UTC)).getTime() + ",";
-        jsonInfo += "\"messageId\":\"" + ("C10016ICORP" + date.format(formatter) + uuid.toString()) + "\"}";
-
-        /*hased info*/
-        byte[] encodedhash = digestSHA256.digest(jsonInfo.getBytes(StandardCharsets.UTF_8));
-        String A = SignerLogic.getHex(encodedhash).toUpperCase();
-
-        /*hashed content*/
-        encodedhash = digestSHA256.digest(jsonContent.getBytes(StandardCharsets.UTF_8));
-        String B = SignerLogic.getHex(encodedhash).toUpperCase();
-
-        String C = A + "." + B;
-
-        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(this.sercetKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        sha256_HMAC.init(secret_key);
-
-
-        String signature = SignerLogic.getHex(sha256_HMAC.doFinal(C.getBytes(StandardCharsets.UTF_8))).toUpperCase();
-
-        String jsonInputString = "{\"content\":" + jsonContent + ",";
-        jsonInputString += "\"info\":" + jsonInfo + ",";
-        jsonInputString += "\"signature\":\"" + signature + "\"}";
-
-        try (OutputStream os = con.getOutputStream()) {
-            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        }
-
-        String responseLine = "";
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder response = new StringBuilder();
-
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
+        try {
+            // Setup the time stamp request
+            TimeStampRequestGenerator tsqGenerator = new TimeStampRequestGenerator();
+            tsqGenerator.setCertReq(true);
+            if (isNotEmpty(policy)) {
+                tsqGenerator.setReqPolicy(new ASN1ObjectIdentifier(policy));
             }
-            System.out.println("CeCA Timestamp response:");
-            System.out.println(response);
-        }
+            BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
+            ASN1ObjectIdentifier digestOid = X509ObjectIdentifiers.id_SHA1;
+            if (isNotEmpty(digestName)) {
+                digestOid = new ASN1ObjectIdentifier(com.lowagie.text.pdf.PdfPKCS7.getDigestOid(digestName));
+            }
+            TimeStampRequest request = tsqGenerator.generate(digestOid, imprint, nonce);
+            byte[] requestBytes = request.getEncoded();
 
-        return responseLine.getBytes();
+            // Call the communications layer
+            respBytes = getTSAResponse(requestBytes);
+
+            // Handle the TSA response
+            TimeStampResponse response = new TimeStampResponse(respBytes);
+
+            // validate communication level attributes (RFC 3161 PKIStatus)
+            response.validate(request);
+            PKIFailureInfo failure = response.getFailInfo();
+            int value = (failure == null) ? 0 : failure.intValue();
+            if (value != 0) {
+                // @todo: Translate value of 15 error codes defined by
+                // PKIFailureInfo to string
+                throw new Exception(MessageLocalization.getComposedMessage("invalid.tsa.1.response.code.2", tsaURL, String.valueOf(value)));
+            }
+            // @todo: validate the time stap certificate chain (if we want
+            // assure we do not sign using an invalid timestamp).
+
+            // extract just the time stamp token (removes communication status
+            // info)
+            TimeStampToken tsToken = response.getTimeStampToken();
+            if (tsToken == null) {
+                throw new Exception(MessageLocalization.getComposedMessage("tsa.1.failed.to.return.time.stamp.token.2", tsaURL, response.getStatusString()));
+            }
+            TimeStampTokenInfo info = tsToken.getTimeStampInfo(); // to view
+
+            caller.setTimeStampToken(tsToken);
+            caller.setSignDate(caller.getTimeStampDate());
+
+            // details
+            byte[] encoded = tsToken.getEncoded();
+            long stop = System.currentTimeMillis();
+
+            // Update our token size estimate for the next call (padded to be
+            // safe)
+            this.tokSzEstimate = encoded.length + 32;
+            return encoded;
+        } catch (Exception e) {
+            throw e;
+        } catch (Throwable t) {
+            throw new Exception(MessageLocalization.getComposedMessage("failed.to.get.tsa.response.from.1", tsaURL), t);
+        }
+//        byte[] respBytes = null;
+//        String httpsURL = this.getTsaURL();
+//
+//        URL url = new URL(httpsURL);
+//
+//        /*set request*/
+//        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//        con.setRequestMethod("POST");
+//        con.setRequestProperty("Content-Type", "application/json");
+//        con.setRequestProperty("Accept", "application/json");
+//
+//        /*set API KEY*/
+//        con.setRequestProperty("X-API-KEY", this.apiKey);
+//        con.setRequestProperty("ServiceType", SERVICE_TYPE);
+//
+//        System.out.println(con.getRequestProperties().toString());
+//
+//        con.setDoOutput(true);
+//
+//        /*data body*/
+//        UUID uuid = UUID.randomUUID();
+//        Date today = new Date();
+//        LocalDateTime date = LocalDateTime.now();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMM");
+//        MessageDigest digestSHA256 = MessageDigest.getInstance("SHA-256");
+//
+//
+//        String jsonContent = "{\"data\":{\"digest\":\"" + SignerLogic.getHex(imprint) + "\",";
+//        jsonContent += "\"algorithm\":\"" + this.getDigestName() + "\"}}";
+//
+//        String jsonInfo = "{\"version\":\"1.0.0\",\"senderId\":\"C10016ICORP\",\"receiverId\":\"P10001EVERIFY\",\"messageType\":1,";
+//        jsonInfo += "\"sendDate\":" + Date.from(date.toInstant(ZoneOffset.UTC)).getTime() + ",";
+//        jsonInfo += "\"messageId\":\"" + ("C10016ICORP" + date.format(formatter) + uuid.toString()) + "\"}";
+//
+//        /*hased info*/
+//        byte[] encodedhash = digestSHA256.digest(jsonInfo.getBytes(StandardCharsets.UTF_8));
+//        String A = SignerLogic.getHex(encodedhash).toUpperCase();
+//
+//        /*hashed content*/
+//        encodedhash = digestSHA256.digest(jsonContent.getBytes(StandardCharsets.UTF_8));
+//        String B = SignerLogic.getHex(encodedhash).toUpperCase();
+//
+//        String C = A + "." + B;
+//
+//        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+//        SecretKeySpec secret_key = new SecretKeySpec(this.sercetKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+//        sha256_HMAC.init(secret_key);
+//
+//
+//        String signature = SignerLogic.getHex(sha256_HMAC.doFinal(C.getBytes(StandardCharsets.UTF_8))).toUpperCase();
+//
+//        String jsonInputString = "{\"content\":" + jsonContent + ",";
+//        jsonInputString += "\"info\":" + jsonInfo + ",";
+//        jsonInputString += "\"signature\":\"" + signature + "\"}";
+//
+//        try (OutputStream os = con.getOutputStream()) {
+//            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+//            os.write(input, 0, input.length);
+//        }
+//
+//        String responseLine = "";
+//        try (BufferedReader br = new BufferedReader(
+//                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+//            StringBuilder response = new StringBuilder();
+//
+//            while ((responseLine = br.readLine()) != null) {
+//                response.append(responseLine.trim());
+//            }
+//            System.out.println("CeCA Timestamp response:");
+//            System.out.println(response);
+//        }
+//
+//        return responseLine.getBytes();
     }
 
     /**

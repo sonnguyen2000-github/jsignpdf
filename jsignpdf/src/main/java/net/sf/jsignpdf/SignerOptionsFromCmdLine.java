@@ -32,6 +32,7 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.*;
 
 import java.net.Proxy;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -241,13 +242,17 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         if (line.hasOption(ARG_PROXY_PORT_LONG))
             setProxyPort(getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
 
-        /*CECA API KEY*/
-        if (line.hasOption("apiKey")) {
-            setApiKey(line.getOptionValue("apiKey"));
-        }
-        /*CECA Sercet Key*/
-        if (line.hasOption("secretKey")) {
-            setSecretKey(line.getOptionValue("secretKey"));
+//        /*CECA API KEY*/
+//        if (line.hasOption("apiKey")) {
+//            setApiKey(line.getOptionValue("apiKey"));
+//        }
+//        /*CECA Sercet Key*/
+//        if (line.hasOption("secretKey")) {
+//            setSecretKey(line.getOptionValue("secretKey"));
+//        }
+        /*Extract only*/
+        if (line.hasOption("extractOnly")) {
+            setExtractOnly(true);
         }
 
         setGui(line.hasOption(ARG_GUI));
@@ -443,11 +448,12 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_GUI).withDescription(RES.get("hlp.gui")).create());
 
-        OPTS.addOption(OptionBuilder.withLongOpt("apiKey").withDescription("Required: API KEY of CeCA").hasArg()
-                .withArgName("apiKey").create());
-
-        OPTS.addOption(OptionBuilder.withLongOpt("secretKey").withDescription("Required: Secret KEY of CeCA").hasArg()
-                .withArgName("secretKey").create());
+//        OPTS.addOption(OptionBuilder.withLongOpt("apiKey").withDescription("Required: API KEY of CeCA").hasArg()
+//                .withArgName("apiKey").create());
+//
+//        OPTS.addOption(OptionBuilder.withLongOpt("secretKey").withDescription("Required: Secret KEY of CeCA").hasArg()
+//                .withArgName("secretKey").create());
+        OPTS.addOption(OptionBuilder.withLongOpt("extractOnly").withDescription("Extract signature info only").create());
     }
 
     /**

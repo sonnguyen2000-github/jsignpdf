@@ -295,6 +295,10 @@ public class PdfPKCS7 {
         return timeStampToken;
     }
 
+    public void setTimeStampToken(TimeStampToken token){
+        this.timeStampToken = token;
+    }
+
     /**
      * Gets the timestamp date
      *
@@ -564,6 +568,7 @@ public class PdfPKCS7 {
 
     /**
      * Generates a signature.
+     * sonnh override here
      *
      * @param privKey       the private key
      * @param certChain     the certificate chain

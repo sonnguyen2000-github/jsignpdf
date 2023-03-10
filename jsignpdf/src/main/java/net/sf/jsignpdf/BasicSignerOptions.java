@@ -135,6 +135,8 @@ public class BasicSignerOptions {
     public String apiKey;
     private String secretKey;
 
+    public boolean extractOnly;
+
     /**
      * Loads options from PropertyProvider
      */
@@ -1222,5 +1224,13 @@ public class BasicSignerOptions {
 
     public boolean hasSecretKey() {
         return this.secretKey != null;
+    }
+
+    public void setExtractOnly(boolean extractOnly) {
+        this.extractOnly = extractOnly;
+    }
+
+    public boolean isExtractOnly() {
+        return this.extractOnly;
     }
 }

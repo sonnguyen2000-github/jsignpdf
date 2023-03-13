@@ -480,7 +480,7 @@ public class SignerLogic implements Runnable {
 //
 //            Files.write(Paths.get(outFile.replace(".pdf", "_extra.txt")), dataToSave.getBytes(StandardCharsets.UTF_8));
 
-//            extract(outFile);
+            extract(outFile);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {
@@ -537,6 +537,10 @@ public class SignerLogic implements Runnable {
     }
 
     public static void extract(String pdf) throws Exception {
+        String dataToSave = "";
+
+        dataToSave += "[";
+
         List<X509Certificate> certificates = new ArrayList<>();
         System.out.println("pdf name: " + pdf);
         MessageDigest digestSHA256 = MessageDigest.getInstance("SHA-256");
@@ -549,10 +553,17 @@ public class SignerLogic implements Runnable {
             List<String> signatures = fields.getSignedFieldNames();
             System.out.println("Signs: " + signatures.size());
             for (String signature : signatures) {
+                int index = signatures.indexOf(signature);
+
+                dataToSave += "{";
 
                 System.out.println("Signature name: " + signature);
                 System.out.println("Signature covers whole document: " + fields.signatureCoversWholeDocument(signature));
                 System.out.println("Document revision: " + fields.getRevision(signature) + " of " + fields.getTotalRevisions());
+
+                dataToSave += "\"Name\":\"" + signature + "\",";
+                dataToSave += "\"Revision\":" + fields.getRevision(signature) + ",";
+                dataToSave += "\"TotalRevision\":" + fields.getTotalRevisions() + ",";
 
                 /*VERIFYING SIGNATURE*/
                 PdfPKCS7 custPk;
@@ -602,10 +613,20 @@ public class SignerLogic implements Runnable {
                 System.out.println("Subject: " + PdfPKCS7.getSubjectFields(certificate));
                 System.out.println("Digest:" + getHex(digestSHA256.digest((custPk.sigAttr))));
                 System.out.println("Signature:" + getHex(custPk.digest));
+
                 System.out.println("Document modified: " + !custPk.verify());
                 System.out.println("Timestamp date: " + custPk.getTimeStampDate().getTimeInMillis());
                 System.out.println("Timestamp valid: " + custPk.verifyTimestampImprint());
                 System.out.println("x509Certificate: " + getHex(certificate.getEncoded()));
+
+                dataToSave += "\"SignDate\":\"" + cal.getTime() + "\",";
+                dataToSave += "\"Subject\":\"" + PdfPKCS7.getSubjectFields(certificate).toString() + "\",";
+                dataToSave += "\"Digest\":\"" + getHex(digestSHA256.digest((custPk.sigAttr))) + "\",";
+                dataToSave += "\"Signature\":\"" + getHex(custPk.digest) + "\",";
+                dataToSave += "\"DocumentModified\":" + !custPk.verify() + ",";
+                dataToSave += "\"TimestampDate\":" + custPk.getTimeStampDate().getTimeInMillis() + ",";
+                dataToSave += "\"TimestampValid\":" + custPk.verifyTimestampImprint() + ",";
+                dataToSave += "\"x509Certificate\":\"" + getHex(certificate.getEncoded()) + "\"";
 
                 KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
                 Object[] fails = PdfPKCS7.verifyCertificates(pkc, kall, null, cal);
@@ -617,7 +638,16 @@ public class SignerLogic implements Runnable {
                 System.out.println("----------------------------------------------------");
 
 
+                dataToSave += "}";
+
+                if (index < signatures.size() - 1) {
+                    dataToSave += ",";
+                }
+
             }
+
+            dataToSave += "]";
+            Files.write(Paths.get(pdf.replace(".pdf", "_extra.txt")), dataToSave.getBytes(StandardCharsets.UTF_8));
         }
 
 

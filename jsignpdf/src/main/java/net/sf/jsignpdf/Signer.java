@@ -275,9 +275,9 @@ public class Signer {
                 /*sonnh: attach placeholder*/
                 if (anOpts.getTrucCertPath() != null) {
                     try {
-                        byte[] hashToSent = CeCA.attachTrucSignaturePlaceholder(inputFile.getPath(), anOpts.getTrucCertPath());
+                        byte[] hashToSent = CeCA.attachTrucSignaturePlaceholder(inputFile.getPath(), anOpts.getTrucCertPath(), anOpts.getBgImgPath());
                         System.out.println("Create TRUC placeholder signature successfully");
-                        Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.txt")), SignerLogic.getHex(hashToSent).getBytes(StandardCharsets.UTF_8));
+                        Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.json")), hashToSent);
 
                     } catch (IOException e) {
                         throw new RuntimeException(e);

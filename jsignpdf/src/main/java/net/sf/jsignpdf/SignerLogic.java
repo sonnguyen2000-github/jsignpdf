@@ -457,8 +457,8 @@ public class SignerLogic implements Runnable {
 
             extract(outFile);
 
-            stp.close();
-            reader.close();
+//            stp.close();
+//            reader.close();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {

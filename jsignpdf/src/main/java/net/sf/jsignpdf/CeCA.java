@@ -13,10 +13,8 @@ import net.sf.jsignpdf.types.ServerAuthentication;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +24,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.HashMap;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
 import static net.sf.jsignpdf.Constants.RES;
@@ -39,12 +38,13 @@ public class CeCA {
     /**
      * @param filepath     Đường dẫn file PDF
      * @param trucCertPath Đường dẫn file CTS của Trục
+     * @param bgImagePath
      * @return this is the hash sent to remote server for signing
      * @throws IOException
      * @throws DocumentException
      * @throws GeneralSecurityException
      */
-    public static byte[] attachTrucSignaturePlaceholder(String filepath, String trucCertPath) throws IOException, DocumentException, GeneralSecurityException {
+    public static byte[] attachTrucSignaturePlaceholder(String filepath, String trucCertPath, @Nullable String bgImagePath) throws IOException, DocumentException, GeneralSecurityException {
         ByteArrayOutputStream preSignedDocument = new ByteArrayOutputStream();
         Path customerPathInDataStorage = Paths.get("./temp.pdf");
         PdfReader pdfReader = new PdfReader(filepath);
@@ -56,20 +56,24 @@ public class CeCA {
         Certificate[] certificatesChain = CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertPath(Collections.singletonList(certificate)).getCertificates().toArray(new java.security.cert.Certificate[0]);
 
         // create empty digital signature inside pre-signed document
-        PdfSignatureAppearance signatureAppearance = stamper.getSignatureAppearance();
-        signatureAppearance.setVisibleSignature(new Rectangle(72, 750, 400, 770), pdfReader.getNumberOfPages(), "P10001EVERIFY");
-        signatureAppearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
-        signatureAppearance.setCertificate(certificate);
+        PdfSignatureAppearance sap = stamper.getSignatureAppearance();
+        sap.setVisibleSignature(new Rectangle(72, 750, 400, 770), pdfReader.getNumberOfPages(), "P10001EVERIFY");
+        sap.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
+        sap.setCertificate(certificate);
         /*TODO*/
-        final Image img = Image.getInstance("/Users/sonnh/Pictures/my_avatar.jpeg");
-        LOGGER.info(RES.get("console.setImage"));
-        signatureAppearance.setImage(img);
-        signatureAppearance.setImageScale(0);
+        if (bgImagePath != null) {
+            final Image img = Image.getInstance(bgImagePath);
+            LOGGER.info(RES.get("console.setImage"));
+            sap.setImage(img);
+        }
 
-        signatureAppearance.setLayer2Text("This is signature of BCT");
+        sap.setImageScale(0);
+
+        sap.setLayer2Text("");
+        /**/
 
         CustomPreSignExternalSignature externalSignatureContainer = new CustomPreSignExternalSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
-        MakeSignature.signExternalContainer(signatureAppearance, externalSignatureContainer, 8192);
+        MakeSignature.signExternalContainer(sap, externalSignatureContainer, 8192);
 //        InputStream data = signatureAppearance.getRangeStream();
 //        final MessageDigest messageDigest = MessageDigest.getInstance(DOCUMENT_HASHING_ALGORITHM);
 //        byte buf[] = new byte[8192];
@@ -79,28 +83,56 @@ public class CeCA {
 //        }
 //        byte hash[] = messageDigest.digest();
 
-//        ExternalDigest digest = new SignExternalDigest();
-//        PdfPKCS7 pdfPKCS7 = new PdfPKCS7(null, certificatesChain, DOCUMENT_HASHING_ALGORITHM, null, digest, false);
+        ExternalDigest digest = new SignExternalDigest();
+        PdfPKCS7 pdfPKCS7 = new PdfPKCS7(null, certificatesChain, DOCUMENT_HASHING_ALGORITHM, null, digest, false);
 
-
+        String dataToSave = "";
+        dataToSave += "{";
         byte[] signatureDigest = externalSignatureContainer.getSignatureDigest();
+        dataToSave += "\"Digest\":\"" + SignerLogic.getHex(signatureDigest) + "\",";
 //        byte[] signatureDigest = hash;
-//        byte[] authAttributes = pdfPKCS7.getAuthenticatedAttributeBytes(signatureDigest, null, null,
-//                MakeSignature.CryptoStandard.CMS);
+        byte[] authAttributes = pdfPKCS7.getAuthenticatedAttributeBytes(signatureDigest, null, null, MakeSignature.CryptoStandard.CMS);
 
 
         Files.write(Paths.get(filepath.replace(".pdf", "_placeholder.pdf")), preSignedDocument.toByteArray());
 
 //        documentDetails.setPreSignedContent(preSignedDocument.toByteArray()); // this is the intermediary document content used in 2nd step in the line with the comment ***PRESIGNED_CONTENT****
 //        documentDetails.setSignatureDigest(signatureDigest); // this is the signature digest used in 2nd step in the line with comment ****SIGNATURE_DIGEST****
-//        byte[] hashForSigning = DigestAlgorithms.digest(new ByteArrayInputStream(authAttributes),
-//                digest.getMessageDigest(DOCUMENT_HASHING_ALGORITHM));
+        byte[] hashForSigning = DigestAlgorithms.digest(new ByteArrayInputStream(authAttributes), digest.getMessageDigest(DOCUMENT_HASHING_ALGORITHM));
 //        documentDetails.setSigningHash(hashForSigning); // this is the hash sent to remote server for signing
 
-        stamper.close();
-        pdfReader.close();
+//        stamper.close();
+//        pdfReader.close();
 
-        return signatureDigest;
+        dataToSave += "\"Hash\":\"" + SignerLogic.getHex(hashForSigning) + "\",";
+        dataToSave += "}";
+
+        return dataToSave.getBytes(StandardCharsets.UTF_8);
+
+        // we create the signature infrastructure
+//        PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
+//        dic.setReason(sap.getReason());
+//        dic.setLocation(sap.getLocation());
+//        dic.setContact(sap.getContact());
+//        dic.setDate(new PdfDate(sap.getSignDate()));
+//        sap.setCryptoDictionary(dic);
+//
+//        HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
+//        exc.put(PdfName.CONTENTS, 8192 * 2 + 2);
+//        sap.preClose(exc);
+//        ExternalDigest externalDigest = new ExternalDigest() {
+//            public MessageDigest getMessageDigest(String hashAlgorithm) throws GeneralSecurityException {
+//                return DigestAlgorithms.getMessageDigest(hashAlgorithm, null);
+//            }
+//        };
+//        PdfPKCS7 sgn = new PdfPKCS7(null, certificatesChain, "SHA256", null, externalDigest, false);
+//        InputStream data = sap.getRangeStream();
+//        byte hash[] = DigestAlgorithms.digest(data, externalDigest.getMessageDigest("SHA256"));
+//        byte[] sh = sgn.getAuthenticatedAttributeBytes(hash, null, null, MakeSignature.CryptoStandard.CMS);
+//        InputStream sh_is = new ByteArrayInputStream(sh);
+//        byte[] signedAttributesHash = DigestAlgorithms.digest(sh_is, externalDigest.getMessageDigest("SHA256"));
+//
+//        return signedAttributesHash;
 
     }
 
@@ -185,7 +217,7 @@ public class CeCA {
 
         pdfPKCS7.setExternalDigest(SignerLogic.hexStringToByteArray(externalSignature), null, SIGNATURE_ENCRYPTION_ALGORITHM);
 
-        byte[] signatureDigest = SignerLogic.hexStringToByteArray(hashedContent); // this is the value from 1st step for ****SIGNATURE_DIGEST****
+        byte[] hash = SignerLogic.hexStringToByteArray(hashedContent); // this is the value from 1st step for ****SIGNATURE_DIGEST****
 
         TSAClientBouncyCastle tsc = null;
         if (tsaServerUrl != null) {
@@ -194,20 +226,34 @@ public class CeCA {
             tsc = new TSAClientBouncyCastle(tsaServerUrl, null, null, 64, "SHA512");
         }
 
-        byte[] encodedSignature = pdfPKCS7.getEncodedPKCS7(signatureDigest, (TSAClient) tsc, null, null, MakeSignature.CryptoStandard.CMS);
-        ExternalSignatureContainer externalSignatureContainer = new CustomExternalSignature(encodedSignature);
+        byte[] encodedSignature = pdfPKCS7.getEncodedPKCS7(hash, (TSAClient) tsc, null, null, MakeSignature.CryptoStandard.CMS);
+//        byte[] paddedSig = new byte[8192];
+//        System.arraycopy(encodedSignature, 0, paddedSig, 0, encodedSignature.length);
+
+//        ExternalSignatureContainer externalSignatureContainer = new CustomExternalSignature(encodedSignature);
 
         // create certificate chain from detached signature
-//        byte[] detachedSignatureContent = SignerLogic.hexStringToByteArray(externalSignature); // this is the detached signature file content received from the remote server which contains also customer the certificate
-//        ExternalSignatureContainer externalSignatureContainer = new CustomExternalSignature(detachedSignatureContent);
+        byte[] detachedSignatureContent = encodedSignature; // this is the detached signature file content received from the remote server which contains also customer the certificate
+        ExternalSignatureContainer externalSignatureContainer = new CustomExternalSignature(detachedSignatureContent);
 
         // add signature content to existing signature container of the intermediary PDF document
         PdfReader pdfReader = new PdfReader(filepath);// this is the value from 1st step for ***PRESIGNED_CONTENT****
         ByteArrayOutputStream signedPdfOutput = new ByteArrayOutputStream();
+//        PdfStamper pdfStamper = new PdfStamper(pdfReader, signedPdfOutput, pdfReader.getPdfVersion());
+//        PdfSignatureAppearance sap = pdfStamper.getSignatureAppearance();
+
+//        PdfDictionary dic2 = new PdfDictionary();
+//        dic2.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
+
+//        try {
+//            sap.close(dic2);
+//        } catch (DocumentException e) {
+//            throw new IOException(e);
+//        }
 
         MakeSignature.signDeferred(pdfReader, "P10001EVERIFY", signedPdfOutput, externalSignatureContainer);
 
-        pdfReader.close();
+//        pdfReader.close();
 
         return signedPdfOutput.toByteArray();
     }

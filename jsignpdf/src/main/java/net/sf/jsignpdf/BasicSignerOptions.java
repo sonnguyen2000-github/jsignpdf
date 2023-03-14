@@ -137,6 +137,11 @@ public class BasicSignerOptions {
 
     public boolean extractOnly;
 
+    public String trucCertPath;
+    public String externalDigest;
+
+    public String hashedContent;
+
     /**
      * Loads options from PropertyProvider
      */
@@ -1232,5 +1237,29 @@ public class BasicSignerOptions {
 
     public boolean isExtractOnly() {
         return this.extractOnly;
+    }
+
+    public void setTrucCertPath(String trucCertPath) {
+        this.trucCertPath = trucCertPath;
+    }
+
+    public String getTrucCertPath() {
+        return this.trucCertPath;
+    }
+
+    public void setExternalDigest(String externalDigest) {
+        this.externalDigest = externalDigest;
+    }
+
+    public String getExternalDigest() {
+        return this.externalDigest;
+    }
+
+    public void setHashedContent(String hashedContent) {
+        this.hashedContent = hashedContent;
+    }
+
+    public String getHashedContent() {
+        return this.hashedContent;
     }
 }

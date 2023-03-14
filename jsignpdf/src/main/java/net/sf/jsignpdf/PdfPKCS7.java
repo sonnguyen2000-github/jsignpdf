@@ -146,7 +146,7 @@ public class PdfPKCS7 {
     private byte[] RSAdata;
     private boolean verified;
     private boolean verifyResult;
-    private byte[] externalDigest;
+    public byte[] externalDigest;
     private byte[] externalRSAdata;
     private final String provider;
 

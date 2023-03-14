@@ -38,6 +38,11 @@ import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -45,10 +50,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import com.itextpdf.text.DocumentException;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
@@ -247,6 +254,42 @@ public class Signer {
                 tmpName.append(anOpts.getOutPrefix());
                 tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
                 anOpts.setOutFile(tmpName.toString());
+
+                /*sonnh: attach external digest*/
+                if (anOpts.getExternalDigest() != null) {
+                    try {
+                        byte[] pdfToSave = CeCA.attachExternalSignature(inputFile.getPath(), anOpts.getExternalDigest(), anOpts.getHashedContent(), anOpts.getTsaUrl(), anOpts.getTrucCertPath());
+                        System.out.println("Append TRUC signature to placeholder successfully");
+                        Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_appended.pdf")), pdfToSave);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (DocumentException e) {
+                        throw new RuntimeException(e);
+                    } catch (GeneralSecurityException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    continue;
+                }
+
+                /*sonnh: attach placeholder*/
+                if (anOpts.getTrucCertPath() != null) {
+                    try {
+                        byte[] hashToSent = CeCA.attachTrucSignaturePlaceholder(inputFile.getPath(), anOpts.getTrucCertPath());
+                        System.out.println("Create TRUC placeholder signature successfully");
+                        Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.txt")), SignerLogic.getHex(hashToSent).getBytes(StandardCharsets.UTF_8));
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (DocumentException e) {
+                        throw new RuntimeException(e);
+                    } catch (GeneralSecurityException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    continue;
+                }
+
                 if (tmpLogic.signFile()) {
                     successCount++;
                 } else {

@@ -86,8 +86,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     @Override
     public void loadCmdLine() throws ParseException {
         String[] cmdLine = getCmdLine();
-        if (cmdLine == null)
-            return;
+        if (cmdLine == null) return;
 
         // create the command line parser
         final CommandLineParser parser = new DefaultParser();
@@ -125,51 +124,30 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         setListKeys(line.hasOption(ARG_LIST_KEYS));
 
         // basic options
-        if (line.hasOption(ARG_KS_TYPE))
-            setKsType(line.getOptionValue(ARG_KS_TYPE));
-        if (line.hasOption(ARG_KS_FILE))
-            setKsFile(line.getOptionValue(ARG_KS_FILE));
-        if (line.hasOption(ARG_KS_PWD))
-            setKsPasswd(line.getOptionValue(ARG_KS_PWD));
-        if (line.hasOption(ARG_KEY_ALIAS))
-            setKeyAlias(line.getOptionValue(ARG_KEY_ALIAS));
-        if (line.hasOption(ARG_KEY_INDEX))
-            setKeyIndex(getInt(line.getParsedOptionValue(ARG_KEY_INDEX), getKeyIndex()));
-        if (line.hasOption(ARG_KEY_PWD))
-            setKeyPasswd(line.getOptionValue(ARG_KEY_PWD));
-        if (line.hasOption(ARG_OUTPATH))
-            setOutPath(line.getOptionValue(ARG_OUTPATH));
-        if (line.hasOption(ARG_OPREFIX))
-            setOutPrefix(line.getOptionValue(ARG_OPREFIX));
-        if (line.hasOption(ARG_OSUFFIX))
-            setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
-        if (line.hasOption(ARG_SIGNER_NAME))
-            setSignerName(line.getOptionValue(ARG_SIGNER_NAME));
-        if (line.hasOption(ARG_REASON))
-            setReason(line.getOptionValue(ARG_REASON));
-        if (line.hasOption(ARG_LOCATION))
-            setLocation(line.getOptionValue(ARG_LOCATION));
-        if (line.hasOption(ARG_CONTACT))
-            setContact(line.getOptionValue(ARG_CONTACT));
+        if (line.hasOption(ARG_KS_TYPE)) setKsType(line.getOptionValue(ARG_KS_TYPE));
+        if (line.hasOption(ARG_KS_FILE)) setKsFile(line.getOptionValue(ARG_KS_FILE));
+        if (line.hasOption(ARG_KS_PWD)) setKsPasswd(line.getOptionValue(ARG_KS_PWD));
+        if (line.hasOption(ARG_KEY_ALIAS)) setKeyAlias(line.getOptionValue(ARG_KEY_ALIAS));
+        if (line.hasOption(ARG_KEY_INDEX)) setKeyIndex(getInt(line.getParsedOptionValue(ARG_KEY_INDEX), getKeyIndex()));
+        if (line.hasOption(ARG_KEY_PWD)) setKeyPasswd(line.getOptionValue(ARG_KEY_PWD));
+        if (line.hasOption(ARG_OUTPATH)) setOutPath(line.getOptionValue(ARG_OUTPATH));
+        if (line.hasOption(ARG_OPREFIX)) setOutPrefix(line.getOptionValue(ARG_OPREFIX));
+        if (line.hasOption(ARG_OSUFFIX)) setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
+        if (line.hasOption(ARG_SIGNER_NAME)) setSignerName(line.getOptionValue(ARG_SIGNER_NAME));
+        if (line.hasOption(ARG_REASON)) setReason(line.getOptionValue(ARG_REASON));
+        if (line.hasOption(ARG_LOCATION)) setLocation(line.getOptionValue(ARG_LOCATION));
+        if (line.hasOption(ARG_CONTACT)) setContact(line.getOptionValue(ARG_CONTACT));
         setAppend(line.hasOption(ARG_APPEND));
-        if (line.hasOption(ARG_CERT_LEVEL))
-            setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
-        if (line.hasOption(ARG_HASH_ALGORITHM))
-            setHashAlgorithm(line.getOptionValue(ARG_HASH_ALGORITHM));
+        if (line.hasOption(ARG_CERT_LEVEL)) setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
+        if (line.hasOption(ARG_HASH_ALGORITHM)) setHashAlgorithm(line.getOptionValue(ARG_HASH_ALGORITHM));
 
         // encryption
-        if (line.hasOption(ARG_ENCRYPTED))
-            setPdfEncryption(PDFEncryption.PASSWORD);
-        if (line.hasOption(ARG_ENCRYPTION))
-            setPdfEncryption(line.getOptionValue(ARG_ENCRYPTION));
-        if (line.hasOption(ARG_PWD_OWNER))
-            setPdfOwnerPwd(line.getOptionValue(ARG_PWD_OWNER));
-        if (line.hasOption(ARG_PWD_USER))
-            setPdfUserPwd(line.getOptionValue(ARG_PWD_USER));
-        if (line.hasOption(ARG_ENC_CERT))
-            setPdfEncryptionCertFile(line.getOptionValue(ARG_ENC_CERT));
-        if (line.hasOption(ARG_RIGHT_PRINT))
-            setRightPrinting(line.getOptionValue(ARG_RIGHT_PRINT));
+        if (line.hasOption(ARG_ENCRYPTED)) setPdfEncryption(PDFEncryption.PASSWORD);
+        if (line.hasOption(ARG_ENCRYPTION)) setPdfEncryption(line.getOptionValue(ARG_ENCRYPTION));
+        if (line.hasOption(ARG_PWD_OWNER)) setPdfOwnerPwd(line.getOptionValue(ARG_PWD_OWNER));
+        if (line.hasOption(ARG_PWD_USER)) setPdfUserPwd(line.getOptionValue(ARG_PWD_USER));
+        if (line.hasOption(ARG_ENC_CERT)) setPdfEncryptionCertFile(line.getOptionValue(ARG_ENC_CERT));
+        if (line.hasOption(ARG_RIGHT_PRINT)) setRightPrinting(line.getOptionValue(ARG_RIGHT_PRINT));
         setRightCopy(!line.hasOption(ARG_DISABLE_COPY_LONG));
         setRightAssembly(!line.hasOption(ARG_DISABLE_ASSEMBLY_LONG));
         setRightFillIn(!line.hasOption(ARG_DISABLE_FILL_LONG));
@@ -178,10 +156,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         setRightModifyContents(!line.hasOption(ARG_DISABLE_MODIFY_CONTENT_LONG));
 
         // visible signature
-        if (line.hasOption(ARG_VISIBLE))
-            setVisible(true);
-        if (line.hasOption(ARG_PAGE))
-            setPage(getInt(line.getParsedOptionValue(ARG_PAGE), getPage()));
+        if (line.hasOption(ARG_VISIBLE)) setVisible(true);
+        if (line.hasOption(ARG_PAGE)) setPage(getInt(line.getParsedOptionValue(ARG_PAGE), getPage()));
         if (line.hasOption(ARG_POS_LLX))
             setPositionLLX(getFloat(line.getParsedOptionValue(ARG_POS_LLX), getPositionLLX()));
         if (line.hasOption(ARG_POS_LLY))
@@ -192,18 +168,13 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setPositionURY(getFloat(line.getParsedOptionValue(ARG_POS_URY), getPositionURY()));
         if (line.hasOption(ARG_BG_SCALE))
             setBgImgScale(getFloat(line.getParsedOptionValue(ARG_BG_SCALE), getBgImgScale()));
-        if (line.hasOption(ARG_RENDER_MODE))
-            setRenderMode(line.getOptionValue(ARG_RENDER_MODE));
-        if (line.hasOption(ARG_L2_TEXT_LONG))
-            setL2Text(line.getOptionValue(ARG_L2_TEXT_LONG));
+        if (line.hasOption(ARG_RENDER_MODE)) setRenderMode(line.getOptionValue(ARG_RENDER_MODE));
+        if (line.hasOption(ARG_L2_TEXT_LONG)) setL2Text(line.getOptionValue(ARG_L2_TEXT_LONG));
         if (line.hasOption(ARG_L2TEXT_FONT_SIZE))
             setL2TextFontSize(getFloat(line.getParsedOptionValue(ARG_L2TEXT_FONT_SIZE), getL2TextFontSize()));
-        if (line.hasOption(ARG_L4_TEXT_LONG))
-            setL4Text(line.getOptionValue(ARG_L4_TEXT_LONG));
-        if (line.hasOption(ARG_IMG_PATH))
-            setImgPath(line.getOptionValue(ARG_IMG_PATH));
-        if (line.hasOption(ARG_BG_PATH))
-            setBgImgPath(line.getOptionValue(ARG_BG_PATH));
+        if (line.hasOption(ARG_L4_TEXT_LONG)) setL4Text(line.getOptionValue(ARG_L4_TEXT_LONG));
+        if (line.hasOption(ARG_IMG_PATH)) setImgPath(line.getOptionValue(ARG_IMG_PATH));
+        if (line.hasOption(ARG_BG_PATH)) setBgImgPath(line.getOptionValue(ARG_BG_PATH));
         setAcro6Layers(!line.hasOption(ARG_DISABLE_ACRO6LAYERS));
 
         // TSA & OCSP
@@ -211,34 +182,21 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setTimestamp(true);
             setTsaUrl(line.getOptionValue(ARG_TSA_URL));
         }
-        if (line.hasOption(ARG_TSA_AUTHN))
-            setTsaServerAuthn(line.getOptionValue(ARG_TSA_AUTHN));
-        if (line.hasOption(ARG_TSA_CERT_FILE_TYPE))
-            setTsaCertFileType(line.getOptionValue(ARG_TSA_CERT_FILE_TYPE));
-        if (line.hasOption(ARG_TSA_CERT_FILE))
-            setTsaCertFile(line.getOptionValue(ARG_TSA_CERT_FILE));
-        if (line.hasOption(ARG_TSA_CERT_PWD))
-            setTsaCertFilePwd(line.getOptionValue(ARG_TSA_CERT_PWD));
+        if (line.hasOption(ARG_TSA_AUTHN)) setTsaServerAuthn(line.getOptionValue(ARG_TSA_AUTHN));
+        if (line.hasOption(ARG_TSA_CERT_FILE_TYPE)) setTsaCertFileType(line.getOptionValue(ARG_TSA_CERT_FILE_TYPE));
+        if (line.hasOption(ARG_TSA_CERT_FILE)) setTsaCertFile(line.getOptionValue(ARG_TSA_CERT_FILE));
+        if (line.hasOption(ARG_TSA_CERT_PWD)) setTsaCertFilePwd(line.getOptionValue(ARG_TSA_CERT_PWD));
 
-        if (line.hasOption(ARG_TSA_USER))
-            setTsaUser(line.getOptionValue(ARG_TSA_USER));
-        if (line.hasOption(ARG_TSA_PWD))
-            setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
-        if (line.hasOption(ARG_TSA_POLICY_LONG))
-            setTsaPolicy(line.getOptionValue(ARG_TSA_POLICY_LONG));
-        if (line.hasOption(ARG_TSA_HASH_ALG))
-            setTsaHashAlg(line.getOptionValue(ARG_TSA_HASH_ALG));
-        if (line.hasOption(ARG_OCSP_LONG))
-            setOcspEnabled(true);
-        if (line.hasOption(ARG_OCSP_SERVER_LONG))
-            setOcspServerUrl(line.getOptionValue(ARG_OCSP_SERVER_LONG));
-        if (line.hasOption(ARG_CRL_LONG))
-            setCrlEnabled(true);
+        if (line.hasOption(ARG_TSA_USER)) setTsaUser(line.getOptionValue(ARG_TSA_USER));
+        if (line.hasOption(ARG_TSA_PWD)) setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
+        if (line.hasOption(ARG_TSA_POLICY_LONG)) setTsaPolicy(line.getOptionValue(ARG_TSA_POLICY_LONG));
+        if (line.hasOption(ARG_TSA_HASH_ALG)) setTsaHashAlg(line.getOptionValue(ARG_TSA_HASH_ALG));
+        if (line.hasOption(ARG_OCSP_LONG)) setOcspEnabled(true);
+        if (line.hasOption(ARG_OCSP_SERVER_LONG)) setOcspServerUrl(line.getOptionValue(ARG_OCSP_SERVER_LONG));
+        if (line.hasOption(ARG_CRL_LONG)) setCrlEnabled(true);
 
-        if (line.hasOption(ARG_PROXY_TYPE_LONG))
-            setProxyType(line.getOptionValue(ARG_PROXY_TYPE_LONG));
-        if (line.hasOption(ARG_PROXY_HOST_LONG))
-            setProxyHost(line.getOptionValue(ARG_PROXY_HOST_LONG));
+        if (line.hasOption(ARG_PROXY_TYPE_LONG)) setProxyType(line.getOptionValue(ARG_PROXY_TYPE_LONG));
+        if (line.hasOption(ARG_PROXY_HOST_LONG)) setProxyHost(line.getOptionValue(ARG_PROXY_HOST_LONG));
         if (line.hasOption(ARG_PROXY_PORT_LONG))
             setProxyPort(getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
 
@@ -255,6 +213,21 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setExtractOnly(true);
         }
 
+        /*Truc Cert path*/
+        if (line.hasOption("trucCertPath")) {
+            setTrucCertPath(line.getOptionValue("trucCertPath"));
+        }
+
+        /*external digest*/
+        if (line.hasOption("externalDigest")) {
+            setExternalDigest(line.getOptionValue("externalDigest"));
+        }
+
+        /*hashed contetn*/
+        if (line.hasOption("hashedContent")) {
+            setHashedContent(line.getOptionValue("hashedContent"));
+        }
+
         setGui(line.hasOption(ARG_GUI));
         if (ArrayUtils.isNotEmpty(files)) {
             setInFile(files[0]);
@@ -265,7 +238,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     /**
      * Returns int value from parsed option object
      *
-     * @param aVal value returned by parser
+     * @param aVal    value returned by parser
      * @param aDefVal default value
      * @return
      */
@@ -279,7 +252,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     /**
      * Returns float value from parsed option object
      *
-     * @param aVal value returned by parser
+     * @param aVal    value returned by parser
      * @param aDefVal default value
      * @return
      */
@@ -296,155 +269,91 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         // commands
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_HELP_LONG).withDescription(RES.get("hlp.help")).create(ARG_HELP));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_VERSION_LONG).withDescription(RES.get("hlp.version")).create(ARG_VERSION));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOADPROPS_LONG).withDescription(RES.get("hlp.loadProperties"))
-                .create(ARG_LOADPROPS));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOADPROPS_FILE_LONG).withDescription(RES.get("hlp.loadPropertiesFile"))
-                .hasArg().withArgName("file").create(ARG_LOADPROPS_FILE));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_KS_TYPES_LONG).withDescription(RES.get("hlp.listKsTypes"))
-                .create(ARG_LIST_KS_TYPES));
-        OPTS.addOption(
-                OptionBuilder.withLongOpt(ARG_LIST_KEYS_LONG).withDescription(RES.get("hlp.listKeys")).create(ARG_LIST_KEYS));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOADPROPS_LONG).withDescription(RES.get("hlp.loadProperties")).create(ARG_LOADPROPS));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOADPROPS_FILE_LONG).withDescription(RES.get("hlp.loadPropertiesFile")).hasArg().withArgName("file").create(ARG_LOADPROPS_FILE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_KS_TYPES_LONG).withDescription(RES.get("hlp.listKsTypes")).create(ARG_LIST_KS_TYPES));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_KEYS_LONG).withDescription(RES.get("hlp.listKeys")).create(ARG_LIST_KEYS));
 
         // keystore and key configuration options
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_TYPE_LONG).withDescription(RES.get("hlp.ksType")).hasArg()
-                .withArgName("type").create(ARG_KS_TYPE));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_FILE_LONG).withDescription(RES.get("hlp.ksFile")).hasArg()
-                .withArgName("file").create(ARG_KS_FILE));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_PWD_LONG).withDescription(RES.get("hlp.ksPwd")).hasArg()
-                .withArgName("password").create(ARG_KS_PWD));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_ALIAS_LONG).withDescription(RES.get("hlp.keyAlias")).hasArg()
-                .withArgName("alias").create(ARG_KEY_ALIAS));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_INDEX_LONG).withDescription(RES.get("hlp.keyIndex")).hasArg()
-                .withType(Number.class).withArgName("index").create(ARG_KEY_INDEX));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_PWD_LONG).withDescription(RES.get("hlp.keyPwd")).hasArg()
-                .withArgName("password").create(ARG_KEY_PWD));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_TYPE_LONG).withDescription(RES.get("hlp.ksType")).hasArg().withArgName("type").create(ARG_KS_TYPE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_FILE_LONG).withDescription(RES.get("hlp.ksFile")).hasArg().withArgName("file").create(ARG_KS_FILE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_PWD_LONG).withDescription(RES.get("hlp.ksPwd")).hasArg().withArgName("password").create(ARG_KS_PWD));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_ALIAS_LONG).withDescription(RES.get("hlp.keyAlias")).hasArg().withArgName("alias").create(ARG_KEY_ALIAS));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_INDEX_LONG).withDescription(RES.get("hlp.keyIndex")).hasArg().withType(Number.class).withArgName("index").create(ARG_KEY_INDEX));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_PWD_LONG).withDescription(RES.get("hlp.keyPwd")).hasArg().withArgName("password").create(ARG_KEY_PWD));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OUTPATH_LONG).withDescription(RES.get("hlp.outPath")).hasArg()
-                .withArgName("path").create(ARG_OUTPATH));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OPREFIX_LONG).withDescription(RES.get("hlp.outPrefix")).hasArg()
-                .withArgName("prefix").create(ARG_OPREFIX));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OSUFFIX_LONG).withDescription(RES.get("hlp.outSuffix")).hasArg()
-                .withArgName("suffix").create(ARG_OSUFFIX));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_SIGNER_NAME_LONG).withDescription(RES.get("hlp.signerName")).hasArg()
-                .withArgName("signer").create(ARG_SIGNER_NAME));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_REASON_LONG).withDescription(RES.get("hlp.reason")).hasArg()
-                .withArgName("reason").create(ARG_REASON));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOCATION_LONG).withDescription(RES.get("hlp.location")).hasArg()
-                .withArgName("location").create(ARG_LOCATION));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_CONTACT_LONG).withDescription(RES.get("hlp.contact")).hasArg()
-                .withArgName("contact").create(ARG_CONTACT));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OUTPATH_LONG).withDescription(RES.get("hlp.outPath")).hasArg().withArgName("path").create(ARG_OUTPATH));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OPREFIX_LONG).withDescription(RES.get("hlp.outPrefix")).hasArg().withArgName("prefix").create(ARG_OPREFIX));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OSUFFIX_LONG).withDescription(RES.get("hlp.outSuffix")).hasArg().withArgName("suffix").create(ARG_OSUFFIX));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_SIGNER_NAME_LONG).withDescription(RES.get("hlp.signerName")).hasArg().withArgName("signer").create(ARG_SIGNER_NAME));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_REASON_LONG).withDescription(RES.get("hlp.reason")).hasArg().withArgName("reason").create(ARG_REASON));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOCATION_LONG).withDescription(RES.get("hlp.location")).hasArg().withArgName("location").create(ARG_LOCATION));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_CONTACT_LONG).withDescription(RES.get("hlp.contact")).hasArg().withArgName("contact").create(ARG_CONTACT));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_APPEND_LONG).withDescription(RES.get("hlp.append")).create(ARG_APPEND));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_CERT_LEVEL_LONG)
-                .withDescription(RES.get("hlp.certLevel", getEnumValues(CertificationLevel.values()))).hasArg()
-                .withArgName("level").create(ARG_CERT_LEVEL));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_HASH_ALGORITHM_LONG)
-                .withDescription(RES.get("hlp.hashAlgorithm", getEnumValues(HashAlgorithm.values()))).hasArg()
-                .withArgName("algorithm").create(ARG_HASH_ALGORITHM));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_CERT_LEVEL_LONG).withDescription(RES.get("hlp.certLevel", getEnumValues(CertificationLevel.values()))).hasArg().withArgName("level").create(ARG_CERT_LEVEL));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_HASH_ALGORITHM_LONG).withDescription(RES.get("hlp.hashAlgorithm", getEnumValues(HashAlgorithm.values()))).hasArg().withArgName("algorithm").create(ARG_HASH_ALGORITHM));
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_QUIET_LONG).withDescription(RES.get("hlp.quiet")).create(ARG_QUIET));
 
         // Encryption and rights
-        OPTS.addOption(
-                OptionBuilder.withLongOpt(ARG_ENCRYPTED_LONG).withDescription(RES.get("hlp.encrypted")).create(ARG_ENCRYPTED));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENCRYPTION_LONG)
-                .withDescription(RES.get("hlp.encryption", getEnumValues(PDFEncryption.values()))).hasArg().withArgName("mode")
-                .create(ARG_ENCRYPTION));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PWD_OWNER_LONG).withDescription(RES.get("hlp.ownerpwd")).hasArg()
-                .withArgName("password").create(ARG_PWD_OWNER));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PWD_USER_LONG).withDescription(RES.get("hlp.userpwd")).hasArg()
-                .withArgName("password").create(ARG_PWD_USER));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENC_CERT_LONG).withDescription(RES.get("hlp.encCert")).hasArg()
-                .withArgName("file").create(ARG_ENC_CERT));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_RIGHT_PRINT_LONG)
-                .withDescription(RES.get("hlp.printRight", getEnumValues(PrintRight.values()))).hasArg().withArgName("right")
-                .create(ARG_RIGHT_PRINT));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENCRYPTED_LONG).withDescription(RES.get("hlp.encrypted")).create(ARG_ENCRYPTED));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENCRYPTION_LONG).withDescription(RES.get("hlp.encryption", getEnumValues(PDFEncryption.values()))).hasArg().withArgName("mode").create(ARG_ENCRYPTION));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PWD_OWNER_LONG).withDescription(RES.get("hlp.ownerpwd")).hasArg().withArgName("password").create(ARG_PWD_OWNER));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PWD_USER_LONG).withDescription(RES.get("hlp.userpwd")).hasArg().withArgName("password").create(ARG_PWD_USER));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENC_CERT_LONG).withDescription(RES.get("hlp.encCert")).hasArg().withArgName("file").create(ARG_ENC_CERT));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_RIGHT_PRINT_LONG).withDescription(RES.get("hlp.printRight", getEnumValues(PrintRight.values()))).hasArg().withArgName("right").create(ARG_RIGHT_PRINT));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_COPY_LONG).withDescription(RES.get("hlp.disableCopy")).create());
-        OPTS.addOption(
-                OptionBuilder.withLongOpt(ARG_DISABLE_ASSEMBLY_LONG).withDescription(RES.get("hlp.disableAssembly")).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_ASSEMBLY_LONG).withDescription(RES.get("hlp.disableAssembly")).create());
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_FILL_LONG).withDescription(RES.get("hlp.disableFill")).create());
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_SCREEN_READERS_LONG).withDescription(RES.get("hlp.disableScrRead"))
-                .create());
-        OPTS.addOption(
-                OptionBuilder.withLongOpt(ARG_DISABLE_MODIFY_ANNOT_LONG).withDescription(RES.get("hlp.disableAnnot")).create());
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_MODIFY_CONTENT_LONG).withDescription(RES.get("hlp.disableContent"))
-                .create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_SCREEN_READERS_LONG).withDescription(RES.get("hlp.disableScrRead")).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_MODIFY_ANNOT_LONG).withDescription(RES.get("hlp.disableAnnot")).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_DISABLE_MODIFY_CONTENT_LONG).withDescription(RES.get("hlp.disableContent")).create());
 
         // visible signature options
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_VISIBLE_LONG).withDescription(RES.get("hlp.visible")).create(ARG_VISIBLE));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PAGE_LONG).withDescription(RES.get("hlp.page")).hasArg()
-                .withType(Number.class).withArgName("pageNumber").create(ARG_PAGE));
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posLLX")).hasArg().withType(Number.class)
-                .withArgName("position").create(ARG_POS_LLX));
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posLLY")).hasArg().withType(Number.class)
-                .withArgName("position").create(ARG_POS_LLY));
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posURX")).hasArg().withType(Number.class)
-                .withArgName("position").create(ARG_POS_URX));
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posURY")).hasArg().withType(Number.class)
-                .withArgName("position").create(ARG_POS_URY));
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.imgPath")).withLongOpt(ARG_IMG_PATH).hasArg()
-                .withArgName("file").create());
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.bgPath")).withLongOpt(ARG_BG_PATH).hasArg()
-                .withArgName("file").create());
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.bgScale")).withLongOpt(ARG_BG_SCALE).hasArg()
-                .withType(Number.class).withArgName("scale").create());
-        OPTS.addOption(
-                OptionBuilder.withDescription(RES.get("hlp.disableAcro6Layers")).withLongOpt(ARG_DISABLE_ACRO6LAYERS).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PAGE_LONG).withDescription(RES.get("hlp.page")).hasArg().withType(Number.class).withArgName("pageNumber").create(ARG_PAGE));
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posLLX")).hasArg().withType(Number.class).withArgName("position").create(ARG_POS_LLX));
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posLLY")).hasArg().withType(Number.class).withArgName("position").create(ARG_POS_LLY));
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posURX")).hasArg().withType(Number.class).withArgName("position").create(ARG_POS_URX));
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.posURY")).hasArg().withType(Number.class).withArgName("position").create(ARG_POS_URY));
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.imgPath")).withLongOpt(ARG_IMG_PATH).hasArg().withArgName("file").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.bgPath")).withLongOpt(ARG_BG_PATH).hasArg().withArgName("file").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.bgScale")).withLongOpt(ARG_BG_SCALE).hasArg().withType(Number.class).withArgName("scale").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.disableAcro6Layers")).withLongOpt(ARG_DISABLE_ACRO6LAYERS).create());
 
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.renderMode", getEnumValues(RenderMode.values())))
-                .withLongOpt(ARG_RENDER_MODE).hasArg().withArgName("mode").create());
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l2Text")).withLongOpt(ARG_L2_TEXT_LONG).hasArg()
-                .withArgName("text").create());
-        OPTS.addOption(
-                OptionBuilder.withDescription(RES.get("hlp.l2TextFontSize", String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)))
-                        .withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG).hasArg().withType(Number.class).withArgName("size")
-                        .create(ARG_L2TEXT_FONT_SIZE));
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l4Text")).withLongOpt(ARG_L4_TEXT_LONG).hasArg()
-                .withArgName("text").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.renderMode", getEnumValues(RenderMode.values()))).withLongOpt(ARG_RENDER_MODE).hasArg().withArgName("mode").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l2Text")).withLongOpt(ARG_L2_TEXT_LONG).hasArg().withArgName("text").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l2TextFontSize", String.valueOf(Constants.DEFVAL_L2_FONT_SIZE))).withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG).hasArg().withType(Number.class).withArgName("size").create(ARG_L2TEXT_FONT_SIZE));
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l4Text")).withLongOpt(ARG_L4_TEXT_LONG).hasArg().withArgName("text").create());
 
         // TSA & OCSP
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_URL_LONG).withDescription(RES.get("hlp.tsaUrl")).hasArg()
-                .withArgName("URL").create(ARG_TSA_URL));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_URL_LONG).withDescription(RES.get("hlp.tsaUrl")).hasArg().withArgName("URL").create(ARG_TSA_URL));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_AUTHN_LONG)
-                .withDescription(RES.get("hlp.tsaAuthn", getEnumValues(ServerAuthentication.values()))).hasArg()
-                .withArgName("method").create(ARG_TSA_AUTHN));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_AUTHN_LONG).withDescription(RES.get("hlp.tsaAuthn", getEnumValues(ServerAuthentication.values()))).hasArg().withArgName("method").create(ARG_TSA_AUTHN));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_TYPE_LONG).withDescription(RES.get("hlp.tsaCertFileType"))
-                .hasArg().withArgName("ks-type").create(ARG_TSA_CERT_FILE_TYPE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_TYPE_LONG).withDescription(RES.get("hlp.tsaCertFileType")).hasArg().withArgName("ks-type").create(ARG_TSA_CERT_FILE_TYPE));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_LONG).withDescription(RES.get("hlp.tsaCertFile")).hasArg()
-                .withArgName("file").create(ARG_TSA_CERT_FILE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_LONG).withDescription(RES.get("hlp.tsaCertFile")).hasArg().withArgName("file").create(ARG_TSA_CERT_FILE));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_PWD_LONG).withDescription(RES.get("hlp.tsaCertPasswd")).hasArg()
-                .withArgName("password").create(ARG_TSA_CERT_PWD));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_PWD_LONG).withDescription(RES.get("hlp.tsaCertPasswd")).hasArg().withArgName("password").create(ARG_TSA_CERT_PWD));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_USER_LONG).withDescription(RES.get("hlp.tsaUser")).hasArg()
-                .withArgName("username").create(ARG_TSA_USER));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_USER_LONG).withDescription(RES.get("hlp.tsaUser")).hasArg().withArgName("username").create(ARG_TSA_USER));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_PWD_LONG).withDescription(RES.get("hlp.tsaPwd")).hasArg()
-                .withArgName("password").create(ARG_TSA_PWD));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_PWD_LONG).withDescription(RES.get("hlp.tsaPwd")).hasArg().withArgName("password").create(ARG_TSA_PWD));
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_POLICY_LONG).withDescription(RES.get("hlp.tsaPolicy")).hasArg()
-                .withArgName("policyOID").create());
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_HASH_ALG_LONG)
-                .withDescription(RES.get("hlp.tsaHashAlg", Constants.DEFVAL_TSA_HASH_ALG)).hasArg().withArgName("algorithm")
-                .create(ARG_TSA_HASH_ALG));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_POLICY_LONG).withDescription(RES.get("hlp.tsaPolicy")).hasArg().withArgName("policyOID").create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_HASH_ALG_LONG).withDescription(RES.get("hlp.tsaHashAlg", Constants.DEFVAL_TSA_HASH_ALG)).hasArg().withArgName("algorithm").create(ARG_TSA_HASH_ALG));
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_LONG).withDescription(RES.get("hlp.ocsp")).create());
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_SERVER_LONG).withDescription(RES.get("hlp.ocspServerUrl")).hasArg()
-                .withArgName("responderUrl").create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_SERVER_LONG).withDescription(RES.get("hlp.ocspServerUrl")).hasArg().withArgName("responderUrl").create());
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_CRL_LONG).withDescription(RES.get("hlp.crl")).create());
 
-        OPTS.addOption(OptionBuilder
-                .withDescription(RES.get("hlp.proxyType", DEFVAL_PROXY_TYPE.name(), getEnumValues(Proxy.Type.values())))
-                .withLongOpt(ARG_PROXY_TYPE_LONG).hasArg().withArgName("type").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyType", DEFVAL_PROXY_TYPE.name(), getEnumValues(Proxy.Type.values()))).withLongOpt(ARG_PROXY_TYPE_LONG).hasArg().withArgName("type").create());
 
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyHost")).withLongOpt(ARG_PROXY_HOST_LONG).hasArg()
-                .withArgName("hostname").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyHost")).withLongOpt(ARG_PROXY_HOST_LONG).hasArg().withArgName("hostname").create());
 
-        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyPort", String.valueOf(DEFVAL_PROXY_PORT)))
-                .withLongOpt(ARG_PROXY_PORT_LONG).hasArg().withType(Number.class).withArgName("port").create());
+        OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyPort", String.valueOf(DEFVAL_PROXY_PORT))).withLongOpt(ARG_PROXY_PORT_LONG).hasArg().withType(Number.class).withArgName("port").create());
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_GUI).withDescription(RES.get("hlp.gui")).create());
 
@@ -454,14 +363,16 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 //        OPTS.addOption(OptionBuilder.withLongOpt("secretKey").withDescription("Required: Secret KEY of CeCA").hasArg()
 //                .withArgName("secretKey").create());
         OPTS.addOption(OptionBuilder.withLongOpt("extractOnly").withDescription("Extract signature info only").create());
+        OPTS.addOption(OptionBuilder.withLongOpt("trucCertPath").withDescription("Đường dẫn đến CTS Trục").hasArg().withArgName("trucCertPath").create());
+        OPTS.addOption(OptionBuilder.withLongOpt("externalDigest").withDescription("Chữ ký của BTC trả về, dạng HEX").hasArg().withArgName("externalDigest").create());
+        OPTS.addOption(OptionBuilder.withLongOpt("hashedContent").withDescription("Hash của file khi gửi cho Trục").hasArg().withArgName("hashedContent").create());
     }
 
     /**
      * @return the outPrefix
      */
     public String getOutPrefix() {
-        if (outPrefix == null)
-            outPrefix = "";
+        if (outPrefix == null) outPrefix = "";
         return outPrefix;
     }
 
@@ -496,8 +407,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      * @return the outSuffix
      */
     public String getOutSuffix() {
-        if (outSuffix == null)
-            outSuffix = "";
+        if (outSuffix == null) outSuffix = "";
         return outSuffix;
     }
 

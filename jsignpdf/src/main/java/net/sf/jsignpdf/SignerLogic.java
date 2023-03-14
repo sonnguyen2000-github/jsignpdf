@@ -29,52 +29,39 @@
  */
 package net.sf.jsignpdf;
 
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CONTACT;
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_LOCATION;
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
-import static net.sf.jsignpdf.Constants.RES;
-import static net.sf.jsignpdf.Constants.LOGGER;
+import com.lowagie.text.Font;
+import com.lowagie.text.Image;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.*;
+import net.sf.jsignpdf.crl.CRLInfo;
+import net.sf.jsignpdf.extcsp.CloudFoxy;
+import net.sf.jsignpdf.ssl.SSLInitializer;
+import net.sf.jsignpdf.types.*;
+import net.sf.jsignpdf.utils.FontUtils;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.PKCS11Utils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.pdfbox.util.Hex;
+import org.bouncycastle.jcajce.provider.digest.SHA256;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.MessageDigest;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 
-import com.lowagie.text.pdf.*;
-import net.sf.jsignpdf.crl.CRLInfo;
-import net.sf.jsignpdf.extcsp.CloudFoxy;
-import net.sf.jsignpdf.ssl.SSLInitializer;
-import net.sf.jsignpdf.types.HashAlgorithm;
-import net.sf.jsignpdf.types.PDFEncryption;
-import net.sf.jsignpdf.types.PdfVersion;
-import net.sf.jsignpdf.types.RenderMode;
-import net.sf.jsignpdf.types.ServerAuthentication;
-import net.sf.jsignpdf.utils.FontUtils;
-import net.sf.jsignpdf.utils.KeyStoreUtils;
-import net.sf.jsignpdf.utils.PKCS11Utils;
-
-import net.sf.jsignpdf.utils.PdfUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
-
-import com.lowagie.text.Font;
-import com.lowagie.text.Image;
-import com.lowagie.text.Rectangle;
+import static net.sf.jsignpdf.Constants.*;
 //import com.lowagie.text.pdf.TSAClientBouncyCastle;
 //import com.lowagie.text.pdf.PdfPKCS7;
 
@@ -402,18 +389,6 @@ public class SignerLogic implements Runnable {
                 }
             }
 
-            /*set API Key*/
-            if (options.hasApiKey()) {
-                assert tsc != null;
-                tsc.setApiKey(options.getApiKey());
-            }
-
-            /*set Secret Key*/
-            if (options.hasSecretKey()) {
-                assert tsc != null;
-                tsc.setSecretKey(options.getSecretKey());
-            }
-
             byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
 
             if (contentEstimated + 2 < encodedSig.length) {
@@ -481,6 +456,9 @@ public class SignerLogic implements Runnable {
 //            Files.write(Paths.get(outFile.replace(".pdf", "_extra.txt")), dataToSave.getBytes(StandardCharsets.UTF_8));
 
             extract(outFile);
+
+            stp.close();
+            reader.close();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {
@@ -529,11 +507,12 @@ public class SignerLogic implements Runnable {
     private static final String HEXES = "0123456789ABCDEF";
 
     static String getHex(byte[] raw) {
-        final StringBuilder hex = new StringBuilder(2 * raw.length);
-        for (final byte b : raw) {
-            hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
-        }
-        return hex.toString();
+        return Hex.getString(raw).toUpperCase();
+//        final StringBuilder hex = new StringBuilder(2 * raw.length);
+//        for (final byte b : raw) {
+//            hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
+//        }
+//        return hex.toString();
     }
 
     public static void extract(String pdf) throws Exception {
@@ -620,7 +599,7 @@ public class SignerLogic implements Runnable {
                 System.out.println("x509Certificate: " + getHex(certificate.getEncoded()));
 
                 dataToSave += "\"SignDate\":\"" + cal.getTime() + "\",";
-                dataToSave += "\"Subject\":\"" + PdfPKCS7.getSubjectFields(certificate).toString() + "\",";
+                dataToSave += "\"Subject\":\"" + PdfPKCS7.getSubjectFields(certificate) + "\",";
                 dataToSave += "\"Digest\":\"" + getHex(digestSHA256.digest((custPk.sigAttr))) + "\",";
                 dataToSave += "\"Signature\":\"" + getHex(custPk.digest) + "\",";
                 dataToSave += "\"DocumentModified\":" + !custPk.verify() + ",";
@@ -647,7 +626,7 @@ public class SignerLogic implements Runnable {
             }
 
             dataToSave += "]";
-            Files.write(Paths.get(pdf.replace(".pdf", "_extra.txt")), dataToSave.getBytes(StandardCharsets.UTF_8));
+            Files.write(Paths.get(pdf.replace(".pdf", "_extra.json")), dataToSave.getBytes(StandardCharsets.UTF_8));
         }
 
 
@@ -680,5 +659,16 @@ public class SignerLogic implements Runnable {
             } catch (Exception e) {
             }
         }
+    }
+
+    /* s must be an even-length string. */
+    public static byte[] hexStringToByteArray(String s) throws IOException {
+        return Hex.decodeHex(s);
+//        int len = s.length();
+//        byte[] data = new byte[len / 2];
+//        for (int i = 0; i < len; i += 2) {
+//            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+//        }
+//        return data;
     }
 }

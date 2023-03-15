@@ -412,6 +412,16 @@ public class Constants {
 
     public static final String ARG_GUI = "gui";
 
+    public static final String ARG_EXTRACT_ONLY = "extractOnly";
+
+    public static final String ARG_CERT_PATH = "certPath";
+
+    public static final String ARG_EXTERNAL_SIGNATURE = "externalSignature";
+
+    public static final String ARG_EXTERNAL_DIGEST = "externalDigest";
+
+    public static final String ARG_FIELD_NAME = "fieldName";
+
     public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
 
     static {

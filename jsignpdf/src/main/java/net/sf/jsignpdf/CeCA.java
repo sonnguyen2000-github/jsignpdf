@@ -9,10 +9,7 @@ import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.security.*;
 import com.itextpdf.text.pdf.security.PdfPKCS7;
 import com.itextpdf.text.pdf.security.TSAClientBouncyCastle;
-import net.sf.jsignpdf.types.ServerAuthentication;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,11 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
-import java.util.HashMap;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
 import static net.sf.jsignpdf.Constants.RES;
@@ -35,16 +30,17 @@ public class CeCA {
     public static final String CERTIFICATE_TYPE = "X.509";
     public static final String SIGNATURE_ENCRYPTION_ALGORITHM = "RSA";
 
+    public static BasicSignerOptions basicSignerOptions;
+
     /**
      * @param filepath     Đường dẫn file PDF
      * @param trucCertPath Đường dẫn file CTS của Trục
-     * @param bgImagePath
      * @return this is the hash sent to remote server for signing
      * @throws IOException
      * @throws DocumentException
      * @throws GeneralSecurityException
      */
-    public static byte[] attachTrucSignaturePlaceholder(String filepath, String trucCertPath, @Nullable String bgImagePath) throws IOException, DocumentException, GeneralSecurityException {
+    public static byte[] attachTrucSignaturePlaceholder(String filepath, String trucCertPath) throws IOException, DocumentException, GeneralSecurityException {
         ByteArrayOutputStream preSignedDocument = new ByteArrayOutputStream();
         Path customerPathInDataStorage = Paths.get("./temp.pdf");
         PdfReader pdfReader = new PdfReader(filepath);
@@ -57,12 +53,12 @@ public class CeCA {
 
         // create empty digital signature inside pre-signed document
         PdfSignatureAppearance sap = stamper.getSignatureAppearance();
-        sap.setVisibleSignature(new Rectangle(72, 750, 400, 770), pdfReader.getNumberOfPages(), "P10001EVERIFY");
+        sap.setVisibleSignature(new Rectangle(basicSignerOptions.getPositionLLX(), basicSignerOptions.getPositionLLY(), basicSignerOptions.getPositionURX(), basicSignerOptions.getPositionURY()), pdfReader.getNumberOfPages(), basicSignerOptions.getFieldName());
         sap.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
         sap.setCertificate(certificate);
         /*TODO*/
-        if (bgImagePath != null) {
-            final Image img = Image.getInstance(bgImagePath);
+        if (basicSignerOptions.getBgImgPath() != null) {
+            final Image img = Image.getInstance(basicSignerOptions.getBgImgPath());
             LOGGER.info(RES.get("console.setImage"));
             sap.setImage(img);
         }
@@ -200,15 +196,13 @@ public class CeCA {
         }
     }
 
-    /**
-     * @param filepath
-     * @param externalSignature in HEX
-     * @param hashedContent
-     * @param tsaServerUrl
-     * @param trucCertPath
-     */
-    public static byte[] attachExternalSignature(String filepath, String externalSignature, String hashedContent, @Nullable String tsaServerUrl, String trucCertPath) throws IOException, DocumentException, GeneralSecurityException {
-        X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertificate(Files.newInputStream(Paths.get(trucCertPath)));
+    public static byte[] attachExternalSignature(String filepath) throws IOException, DocumentException, GeneralSecurityException {
+        String certPath = basicSignerOptions.getCertPath();
+        String externalSignature = basicSignerOptions.getExternalSignature();
+        String tsaServerUrl = basicSignerOptions.getTsaUrl();
+        String externalDigest = basicSignerOptions.getExternalDigest();
+
+        X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertificate(Files.newInputStream(Paths.get(certPath)));
         Certificate[] certificatesChain = CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertPath(Collections.singletonList(certificate)).getCertificates().toArray(new Certificate[0]);
 
         // create digital signature from detached signature
@@ -217,7 +211,7 @@ public class CeCA {
 
         pdfPKCS7.setExternalDigest(SignerLogic.hexStringToByteArray(externalSignature), null, SIGNATURE_ENCRYPTION_ALGORITHM);
 
-        byte[] hash = SignerLogic.hexStringToByteArray(hashedContent); // this is the value from 1st step for ****SIGNATURE_DIGEST****
+        byte[] secondDigest = SignerLogic.hexStringToByteArray(externalDigest); // this is the value from 1st step for ****SIGNATURE_DIGEST****
 
         TSAClientBouncyCastle tsc = null;
         if (tsaServerUrl != null) {
@@ -226,7 +220,7 @@ public class CeCA {
             tsc = new TSAClientBouncyCastle(tsaServerUrl, null, null, 64, "SHA512");
         }
 
-        byte[] encodedSignature = pdfPKCS7.getEncodedPKCS7(hash, (TSAClient) tsc, null, null, MakeSignature.CryptoStandard.CMS);
+        byte[] encodedSignature = pdfPKCS7.getEncodedPKCS7(secondDigest, (TSAClient) tsc, null, null, MakeSignature.CryptoStandard.CMS);
 //        byte[] paddedSig = new byte[8192];
 //        System.arraycopy(encodedSignature, 0, paddedSig, 0, encodedSignature.length);
 
@@ -251,7 +245,7 @@ public class CeCA {
 //            throw new IOException(e);
 //        }
 
-        MakeSignature.signDeferred(pdfReader, "P10001EVERIFY", signedPdfOutput, externalSignatureContainer);
+        MakeSignature.signDeferred(pdfReader, basicSignerOptions.getFieldName(), signedPdfOutput, externalSignatureContainer);
 
 //        pdfReader.close();
 

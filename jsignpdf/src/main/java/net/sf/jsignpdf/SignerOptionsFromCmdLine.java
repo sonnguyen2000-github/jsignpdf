@@ -32,7 +32,6 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.*;
 
 import java.net.Proxy;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -209,23 +208,28 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 //            setSecretKey(line.getOptionValue("secretKey"));
 //        }
         /*Extract only*/
-        if (line.hasOption("extractOnly")) {
+        if (line.hasOption(ARG_EXTRACT_ONLY)) {
             setExtractOnly(true);
         }
 
         /*Truc Cert path*/
-        if (line.hasOption("trucCertPath")) {
-            setTrucCertPath(line.getOptionValue("trucCertPath"));
+        if (line.hasOption(ARG_CERT_PATH)) {
+            setCertPath(line.getOptionValue(ARG_CERT_PATH));
+        }
+
+        /*external signature*/
+        if (line.hasOption(ARG_EXTERNAL_SIGNATURE)) {
+            setExternalSignature(line.getOptionValue(ARG_EXTERNAL_SIGNATURE));
         }
 
         /*external digest*/
-        if (line.hasOption("externalDigest")) {
-            setExternalDigest(line.getOptionValue("externalDigest"));
+        if (line.hasOption(ARG_EXTERNAL_DIGEST)) {
+            setExternalDigest(line.getOptionValue(ARG_EXTERNAL_DIGEST));
         }
 
-        /*hashed contetn*/
-        if (line.hasOption("hashedContent")) {
-            setHashedContent(line.getOptionValue("hashedContent"));
+        /*field name*/
+        if (line.hasOption(ARG_FIELD_NAME)) {
+            setFieldName(line.getOptionValue(ARG_FIELD_NAME));
         }
 
         setGui(line.hasOption(ARG_GUI));
@@ -362,10 +366,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 //
 //        OPTS.addOption(OptionBuilder.withLongOpt("secretKey").withDescription("Required: Secret KEY of CeCA").hasArg()
 //                .withArgName("secretKey").create());
-        OPTS.addOption(OptionBuilder.withLongOpt("extractOnly").withDescription("Extract signature info only").create());
-        OPTS.addOption(OptionBuilder.withLongOpt("trucCertPath").withDescription("Đường dẫn đến CTS Trục").hasArg().withArgName("trucCertPath").create());
-        OPTS.addOption(OptionBuilder.withLongOpt("externalDigest").withDescription("Chữ ký của BTC trả về, dạng HEX").hasArg().withArgName("externalDigest").create());
-        OPTS.addOption(OptionBuilder.withLongOpt("hashedContent").withDescription("Hash của file khi gửi cho Trục").hasArg().withArgName("hashedContent").create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_EXTRACT_ONLY).withDescription("Extract signatures info only. Save to **_extra.json file").create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_CERT_PATH).withDescription("Đường dẫn đến file CTS (X.509)").hasArg().withArgName(ARG_CERT_PATH).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_EXTERNAL_SIGNATURE).withDescription("Chữ ký ngoài đính kèm vào, dạng HEX").hasArg().withArgName(ARG_EXTERNAL_SIGNATURE).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_EXTERNAL_DIGEST).withDescription("SHA256 Digest của dữ liệu (SHA256 của PdfPKCS7.getAuthenticatedAttributeBytes)").hasArg().withArgName(ARG_EXTERNAL_DIGEST).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_FIELD_NAME).withDescription("Tên ô ký. Lưu ý tên này nếu có cần đảm bảo là duy nhất").hasArg().withArgName(ARG_FIELD_NAME).create());
     }
 
     /**

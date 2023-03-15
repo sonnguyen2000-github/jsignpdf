@@ -39,7 +39,6 @@ import static net.sf.jsignpdf.Constants.LOGGER;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -92,21 +91,13 @@ public class Signer {
      * @param args
      */
     public static void main(String[] args) {
-        SignerOptionsFromCmdLine tmpOpts = null;
+        SignerOptionsFromCmdLine tmpOpts = new SignerOptionsFromCmdLine();
+        ;
 
         if (args != null && args.length > 0) {
-            tmpOpts = new SignerOptionsFromCmdLine();
             parseCommandLine(args, tmpOpts);
-        }
-
-        assert tmpOpts != null;
-        if (tmpOpts.isExtractOnly()) {
-            try {
-                SignerLogic.extract(tmpOpts.getInFile());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return;
+        } else {
+            tmpOpts.setPrintHelp(true);
         }
 
         try {
@@ -118,10 +109,17 @@ public class Signer {
         PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 
         traceInfo();
-        boolean showGui = true;
+        boolean showGui = false;
 
         if (tmpOpts != null) {
-            showGui = false;
+            if (tmpOpts.isExtractOnly()) {
+                try {
+                    SignerLogic.extract(tmpOpts.getInFile());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
             if (tmpOpts.isPrintVersion()) {
                 System.out.println("JSignPdf version " + VERSION);
                 return;
@@ -255,10 +253,13 @@ public class Signer {
                 tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
                 anOpts.setOutFile(tmpName.toString());
 
+                /*sonnh: set basic option*/
+                CeCA.basicSignerOptions = anOpts;
+
                 /*sonnh: attach external digest*/
-                if (anOpts.getExternalDigest() != null) {
+                if (anOpts.getExternalSignature() != null) {
                     try {
-                        byte[] pdfToSave = CeCA.attachExternalSignature(inputFile.getPath(), anOpts.getExternalDigest(), anOpts.getHashedContent(), anOpts.getTsaUrl(), anOpts.getTrucCertPath());
+                        byte[] pdfToSave = CeCA.attachExternalSignature(inputFile.getPath());
                         System.out.println("Append TRUC signature to placeholder successfully");
                         Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_appended.pdf")), pdfToSave);
                     } catch (IOException e) {
@@ -273,9 +274,9 @@ public class Signer {
                 }
 
                 /*sonnh: attach placeholder*/
-                if (anOpts.getTrucCertPath() != null) {
+                if (anOpts.getCertPath() != null) {
                     try {
-                        byte[] hashToSent = CeCA.attachTrucSignaturePlaceholder(inputFile.getPath(), anOpts.getTrucCertPath(), anOpts.getBgImgPath());
+                        byte[] hashToSent = CeCA.attachTrucSignaturePlaceholder(inputFile.getPath(), anOpts.getCertPath());
                         System.out.println("Create TRUC placeholder signature successfully");
                         Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.json")), hashToSent);
 

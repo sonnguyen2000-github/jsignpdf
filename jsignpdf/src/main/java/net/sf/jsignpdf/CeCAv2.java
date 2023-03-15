@@ -1,13 +1,13 @@
 package net.sf.jsignpdf;
 
 import com.itextpdf.text.pdf.security.DigestAlgorithms;
+import com.itextpdf.text.pdf.security.ExternalDigest;
+import com.itextpdf.text.pdf.security.MakeSignature;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.*;
-import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.utils.PKCS11Utils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,16 +38,15 @@ public class CeCAv2 {
     public static BasicSignerOptions basicSignerOptions;
 
     /**
-     * @deprecated
-     * Currently not worked
      * @param filepath     Đường dẫn file PDF
      * @param trucCertPath Đường dẫn file CTS của Trục
      * @return this is the hash sent to remote server for signing
      * @throws IOException
      * @throws DocumentException
      * @throws GeneralSecurityException
+     * @deprecated Currently not worked
      */
-    public static byte[] attachTrucSignaturePlaceholder(String filepath, String trucCertPath) throws Exception {
+    public static byte[] attachSignaturePlaceholder(String filepath, String trucCertPath) throws Exception {
         ByteArrayOutputStream preSignedDocument = new ByteArrayOutputStream();
         Path customerPathInDataStorage = Paths.get("./temp.pdf");
         PdfReader pdfReader = new PdfReader(filepath);
@@ -73,6 +72,7 @@ public class CeCAv2 {
         sap.setImageScale(0);
 
         sap.setLayer2Text(basicSignerOptions.getL2Text());
+        sap.setLayer4Text("");
         /**/
 
         /*copy from Signer Logic*/
@@ -83,9 +83,7 @@ public class CeCAv2 {
         dic.setDate(new PdfDate(sap.getSignDate()));
         sap.setCryptoDictionary(dic);
 
-        final CRLInfo crlInfo = new CRLInfo(basicSignerOptions, certificatesChain);
-
-        final int contentEstimated = (int) (Constants.DEFVAL_SIG_SIZE + 2L * crlInfo.getByteCount());
+        final int contentEstimated = 8192;
         final Map<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
         exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
         sap.preClose(exc);
@@ -93,19 +91,10 @@ public class CeCAv2 {
         String provider = PKCS11Utils.getProviderNameForKeystoreType(basicSignerOptions.getKsType());
         InputStream data = sap.getRangeStream();
         final MessageDigest messageDigest = MessageDigest.getInstance(DOCUMENT_HASHING_ALGORITHM);
-        byte buf[] = new byte[8192];
-        int n;
-        while ((n = data.read(buf)) > 0) {
-            messageDigest.update(buf, 0, n);
-        }
-        byte hash[] = messageDigest.digest();
+
+        byte hash[] = DigestAlgorithms.digest(data, messageDigest);
 
         byte[] encodedSig = new byte[0];
-
-        if (contentEstimated + 2 < encodedSig.length) {
-            System.err.println("SigSize - contentEstimated=" + contentEstimated + ", sigLen=" + encodedSig.length);
-            throw new Exception("Not enough space");
-        }
 
         byte[] paddedSig = new byte[contentEstimated];
         System.arraycopy(encodedSig, 0, paddedSig, 0, encodedSig.length);
@@ -116,7 +105,8 @@ public class CeCAv2 {
         sap.close(dic2);
         /**/
 
-        PdfPKCS7 sgn = new PdfPKCS7(sap.getPrivKey(), certificatesChain, crlInfo.getCrls(), DOCUMENT_HASHING_ALGORITHM, provider, false);
+        ExternalDigest digest = new CeCA.SignExternalDigest();
+        com.itextpdf.text.pdf.security.PdfPKCS7 sgn = new com.itextpdf.text.pdf.security.PdfPKCS7(null, certificatesChain, DOCUMENT_HASHING_ALGORITHM, null, digest, false);
 
         Calendar cal = Calendar.getInstance();
         byte[] ocsp = null;
@@ -128,7 +118,7 @@ public class CeCAv2 {
         dataToSave += "\"Digest\":\"" + SignerLogic.getHex(signatureDigest) + "\",";
 //        byte[] signatureDigest = hash;
 
-        byte[] authAttributes = sgn.getAuthenticatedAttributeBytes(hash, cal, ocsp);
+        byte[] authAttributes = sgn.getAuthenticatedAttributeBytes(hash, null, null, MakeSignature.CryptoStandard.CMS);
 
         byte[] hashForSigning = DigestAlgorithms.digest(new ByteArrayInputStream(authAttributes), DigestAlgorithms.getMessageDigest(DOCUMENT_HASHING_ALGORITHM, null));
 

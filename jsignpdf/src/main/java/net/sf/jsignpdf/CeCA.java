@@ -66,6 +66,7 @@ public class CeCA {
         sap.setImageScale(0);
 
         sap.setLayer2Text(basicSignerOptions.getL2Text());
+        sap.setLayer4Text("");
         /**/
 
         CustomPreSignExternalSignature externalSignatureContainer = new CustomPreSignExternalSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);

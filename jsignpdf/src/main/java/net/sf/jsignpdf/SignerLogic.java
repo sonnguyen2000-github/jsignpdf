@@ -297,7 +297,7 @@ public class SignerLogic implements Runnable {
                 if (page < 1 || page > reader.getNumberOfPages()) {
                     page = reader.getNumberOfPages();
                 }
-                sap.setVisibleSignature(new Rectangle(options.getPositionLLX(), options.getPositionLLY(), options.getPositionURX(), options.getPositionURY()), page, null);
+                sap.setVisibleSignature(new Rectangle(options.getPositionLLX(), options.getPositionLLY(), options.getPositionURX(), options.getPositionURY()), page, options.getFieldName());
             }
 
             LOGGER.info(RES.get("console.processing"));
@@ -521,7 +521,7 @@ public class SignerLogic implements Runnable {
         dataToSave += "[";
 
         List<X509Certificate> certificates = new ArrayList<>();
-        System.out.println("pdf name: " + pdf);
+        System.out.println("Pdf name: " + pdf);
         MessageDigest digestSHA256 = MessageDigest.getInstance("SHA-256");
 
 //        KeyStore kall = PdfPKCS7.loadCacertsKeyStore();

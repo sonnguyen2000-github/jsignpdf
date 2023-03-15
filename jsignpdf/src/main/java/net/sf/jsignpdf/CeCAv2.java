@@ -38,6 +38,8 @@ public class CeCAv2 {
     public static BasicSignerOptions basicSignerOptions;
 
     /**
+     * @deprecated
+     * Currently not worked
      * @param filepath     Đường dẫn file PDF
      * @param trucCertPath Đường dẫn file CTS của Trục
      * @return this is the hash sent to remote server for signing

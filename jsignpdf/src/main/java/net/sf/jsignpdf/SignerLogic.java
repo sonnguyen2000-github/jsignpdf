@@ -455,7 +455,8 @@ public class SignerLogic implements Runnable {
 //
 //            Files.write(Paths.get(outFile.replace(".pdf", "_extra.txt")), dataToSave.getBytes(StandardCharsets.UTF_8));
 
-            extract(outFile);
+            /*03/15: comment out*/
+//            extract(outFile);
 
 //            stp.close();
 //            reader.close();

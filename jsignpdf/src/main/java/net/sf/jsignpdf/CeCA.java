@@ -34,13 +34,13 @@ public class CeCA {
 
     /**
      * @param filepath     Đường dẫn file PDF
-     * @param trucCertPath Đường dẫn file CTS của Trục
+     * @param certPath Đường dẫn file CTS của Trục
      * @return this is the hash sent to remote server for signing
      * @throws IOException
      * @throws DocumentException
      * @throws GeneralSecurityException
      */
-    public static byte[] attachTrucSignaturePlaceholder(String filepath, String trucCertPath) throws IOException, DocumentException, GeneralSecurityException {
+    public static byte[] attachSignaturePlaceholder(String filepath, String certPath) throws IOException, DocumentException, GeneralSecurityException {
         ByteArrayOutputStream preSignedDocument = new ByteArrayOutputStream();
         Path customerPathInDataStorage = Paths.get("./temp.pdf");
         PdfReader pdfReader = new PdfReader(filepath);
@@ -48,7 +48,7 @@ public class CeCA {
 
         // create certificate chain using certificate received from remote server system
         // this is the customer certificate received one time from the remote server and used for every document signing initialization
-        X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertificate(Files.newInputStream(Paths.get(trucCertPath)));
+        X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertificate(Files.newInputStream(Paths.get(certPath)));
         Certificate[] certificatesChain = CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertPath(Collections.singletonList(certificate)).getCertificates().toArray(new java.security.cert.Certificate[0]);
 
         // create empty digital signature inside pre-signed document
@@ -65,7 +65,7 @@ public class CeCA {
 
         sap.setImageScale(0);
 
-        sap.setLayer2Text("");
+        sap.setLayer2Text(basicSignerOptions.getL2Text());
         /**/
 
         CustomPreSignExternalSignature externalSignatureContainer = new CustomPreSignExternalSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
@@ -100,7 +100,7 @@ public class CeCA {
 //        stamper.close();
 //        pdfReader.close();
 
-        dataToSave += "\"Hash\":\"" + SignerLogic.getHex(hashForSigning) + "\",";
+        dataToSave += "\"Hash\":\"" + SignerLogic.getHex(hashForSigning) + "\"";
         dataToSave += "}";
 
         return dataToSave.getBytes(StandardCharsets.UTF_8);

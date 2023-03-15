@@ -255,12 +255,13 @@ public class Signer {
 
                 /*sonnh: set basic option*/
                 CeCA.basicSignerOptions = anOpts;
+                CeCAv2.basicSignerOptions = anOpts;
 
                 /*sonnh: attach external digest*/
                 if (anOpts.getExternalSignature() != null) {
                     try {
                         byte[] pdfToSave = CeCA.attachExternalSignature(inputFile.getPath());
-                        System.out.println("Append TRUC signature to placeholder successfully");
+                        System.out.println("Append external signature to placeholder successfully");
                         Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_appended.pdf")), pdfToSave);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -276,8 +277,8 @@ public class Signer {
                 /*sonnh: attach placeholder*/
                 if (anOpts.getCertPath() != null) {
                     try {
-                        byte[] hashToSent = CeCA.attachTrucSignaturePlaceholder(inputFile.getPath(), anOpts.getCertPath());
-                        System.out.println("Create TRUC placeholder signature successfully");
+                        byte[] hashToSent = CeCA.attachSignaturePlaceholder(inputFile.getPath(), anOpts.getCertPath());
+                        System.out.println("Create external signature placeholder successfully");
                         Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.json")), hashToSent);
 
                     } catch (IOException e) {
@@ -285,6 +286,8 @@ public class Signer {
                     } catch (DocumentException e) {
                         throw new RuntimeException(e);
                     } catch (GeneralSecurityException e) {
+                        throw new RuntimeException(e);
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
 

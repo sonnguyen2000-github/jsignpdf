@@ -600,6 +600,8 @@ public class SignerLogic implements Runnable {
                     System.out.println("Timestamp date: " + custPk.getTimeStampDate().getTimeInMillis());
                     System.out.println("Timestamp valid: " + custPk.verifyTimestampImprint());
                     System.out.println("x509Certificate: " + getHex(certificate.getEncoded()));
+                    System.out.println("Hash algorithm: " + custPk.getHashAlgorithm());
+                    System.out.println("Digest algorithm: " + custPk.getDigestAlgorithm());
 
                     dataToSave += "\"SignDate\":\"" + cal.getTime() + "\",";
                     dataToSave += "\"Subject\":\"" + PdfPKCS7.getSubjectFields(certificate) + "\",";
@@ -608,8 +610,8 @@ public class SignerLogic implements Runnable {
                     dataToSave += "\"DocumentModified\":" + !custPk.verify() + ",";
                     dataToSave += "\"TimestampDate\":" + custPk.getTimeStampDate().getTimeInMillis() + ",";
                     dataToSave += "\"TimestampValid\":" + custPk.verifyTimestampImprint() + ",";
-                    dataToSave += "\"x509Certificate\":\"" + getHex(certificate.getEncoded()) + "\"";
-                    dataToSave += "\"HashAlgorithm\":\"" + custPk.getHashAlgorithm() + "\"";
+                    dataToSave += "\"x509Certificate\":\"" + getHex(certificate.getEncoded()) + "\",";
+                    dataToSave += "\"HashAlgorithm\":\"" + custPk.getHashAlgorithm() + "\",";
                     dataToSave += "\"DigestAlgorithm\":\"" + custPk.getDigestAlgorithm() + "\"";
 
                     KeyStore kall = PdfPKCS7.loadCacertsKeyStore();

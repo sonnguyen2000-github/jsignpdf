@@ -523,7 +523,6 @@ public class SignerLogic implements Runnable {
 
         List<X509Certificate> certificates = new ArrayList<>();
         System.out.println("Pdf name: " + pdf);
-        MessageDigest digestSHA256 = MessageDigest.getInstance("SHA-256");
 
 //        KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
 
@@ -546,76 +545,84 @@ public class SignerLogic implements Runnable {
                 dataToSave += "\"TotalRevision\":" + fields.getTotalRevisions() + ",";
 
                 /*VERIFYING SIGNATURE*/
-                PdfPKCS7 custPk;
+                try {
+                    PdfPKCS7 custPk;
 
-                String provider = null;
+                    String provider = null;
 
-                PdfDictionary v = fields.getSignatureDictionary(signature);
+                    PdfDictionary v = fields.getSignatureDictionary(signature);
 
-                PdfName sub = v.getAsName(PdfName.SUBFILTER);
-                PdfString contents = v.getAsString(PdfName.CONTENTS);
-                if (sub.equals(PdfName.ADBE_X509_RSA_SHA1)) {
-                    PdfString cert = v.getAsString(PdfName.CERT);
-                    custPk = new PdfPKCS7(contents.getOriginalBytes(), cert.getBytes(), provider);
-                } else {
-                    custPk = new PdfPKCS7(contents.getOriginalBytes(), provider);
-                }
-                updateByteRange(custPk, v, reader);
-                PdfString str = v.getAsString(PdfName.M);
-                if (str != null) {
-                    custPk.setSignDate(PdfDate.decode(str.toString()));
-                }
-                PdfObject obj = PdfReader.getPdfObject(v.get(PdfName.NAME));
-                if (obj != null) {
-                    if (obj.isString()) {
-                        custPk.setSignName(((PdfString) obj).toUnicodeString());
-                    } else if (obj.isName()) {
-                        custPk.setSignName(PdfName.decodeName(obj.toString()));
+                    PdfName sub = v.getAsName(PdfName.SUBFILTER);
+                    PdfString contents = v.getAsString(PdfName.CONTENTS);
+                    if (sub.equals(PdfName.ADBE_X509_RSA_SHA1)) {
+                        PdfString cert = v.getAsString(PdfName.CERT);
+                        custPk = new PdfPKCS7(contents.getOriginalBytes(), cert.getBytes(), provider);
+                    } else {
+                        custPk = new PdfPKCS7(contents.getOriginalBytes(), provider);
                     }
+                    updateByteRange(custPk, v, reader);
+                    PdfString str = v.getAsString(PdfName.M);
+                    if (str != null) {
+                        custPk.setSignDate(PdfDate.decode(str.toString()));
+                    }
+                    PdfObject obj = PdfReader.getPdfObject(v.get(PdfName.NAME));
+                    if (obj != null) {
+                        if (obj.isString()) {
+                            custPk.setSignName(((PdfString) obj).toUnicodeString());
+                        } else if (obj.isName()) {
+                            custPk.setSignName(PdfName.decodeName(obj.toString()));
+                        }
+                    }
+                    str = v.getAsString(PdfName.REASON);
+                    if (str != null) {
+                        custPk.setReason(str.toUnicodeString());
+                    }
+                    str = v.getAsString(PdfName.LOCATION);
+                    if (str != null) {
+                        custPk.setLocation(str.toUnicodeString());
+                    }
+                    /*end*/
+
+                    Calendar cal = custPk.getSignDate();
+                    Certificate[] pkc = custPk.getCertificates();
+                    MessageDigest messageDigest = MessageDigest.getInstance(custPk.getHashAlgorithm());
+
+
+                    X509Certificate certificate = custPk.getSigningCertificate();
+                    certificates.add(certificate);
+
+                    System.out.println("Sign date:" + cal.getTime());
+                    System.out.println("Subject: " + PdfPKCS7.getSubjectFields(certificate));
+                    System.out.println("Digest:" + getHex(messageDigest.digest((custPk.sigAttr))));
+                    System.out.println("Signature:" + getHex(custPk.digest));
+
+                    System.out.println("Document modified: " + !custPk.verify());
+                    System.out.println("Timestamp date: " + custPk.getTimeStampDate().getTimeInMillis());
+                    System.out.println("Timestamp valid: " + custPk.verifyTimestampImprint());
+                    System.out.println("x509Certificate: " + getHex(certificate.getEncoded()));
+
+                    dataToSave += "\"SignDate\":\"" + cal.getTime() + "\",";
+                    dataToSave += "\"Subject\":\"" + PdfPKCS7.getSubjectFields(certificate) + "\",";
+                    dataToSave += "\"Digest\":\"" + getHex(messageDigest.digest((custPk.sigAttr))) + "\",";
+                    dataToSave += "\"Signature\":\"" + getHex(custPk.digest) + "\",";
+                    dataToSave += "\"DocumentModified\":" + !custPk.verify() + ",";
+                    dataToSave += "\"TimestampDate\":" + custPk.getTimeStampDate().getTimeInMillis() + ",";
+                    dataToSave += "\"TimestampValid\":" + custPk.verifyTimestampImprint() + ",";
+                    dataToSave += "\"x509Certificate\":\"" + getHex(certificate.getEncoded()) + "\"";
+                    dataToSave += "\"HashAlgorithm\":\"" + custPk.getHashAlgorithm() + "\"";
+                    dataToSave += "\"DigestAlgorithm\":\"" + custPk.getDigestAlgorithm() + "\"";
+
+                    KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
+                    Object[] fails = PdfPKCS7.verifyCertificates(pkc, kall, null, cal);
+                    if (fails == null) {
+                        System.out.println("Certificates verified against the KeyStore");
+                    } else {
+                        System.out.println("Certificate failed: " + fails[1]);
+                    }
+                    System.out.println("----------------------------------------------------");
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                str = v.getAsString(PdfName.REASON);
-                if (str != null) {
-                    custPk.setReason(str.toUnicodeString());
-                }
-                str = v.getAsString(PdfName.LOCATION);
-                if (str != null) {
-                    custPk.setLocation(str.toUnicodeString());
-                }
-                /*end*/
-
-                Calendar cal = custPk.getSignDate();
-                Certificate[] pkc = custPk.getCertificates();
-
-                X509Certificate certificate = custPk.getSigningCertificate();
-                certificates.add(certificate);
-
-                System.out.println("Sign date:" + cal.getTime());
-                System.out.println("Subject: " + PdfPKCS7.getSubjectFields(certificate));
-                System.out.println("Digest:" + getHex(digestSHA256.digest((custPk.sigAttr))));
-                System.out.println("Signature:" + getHex(custPk.digest));
-
-                System.out.println("Document modified: " + !custPk.verify());
-                System.out.println("Timestamp date: " + custPk.getTimeStampDate().getTimeInMillis());
-                System.out.println("Timestamp valid: " + custPk.verifyTimestampImprint());
-                System.out.println("x509Certificate: " + getHex(certificate.getEncoded()));
-
-                dataToSave += "\"SignDate\":\"" + cal.getTime() + "\",";
-                dataToSave += "\"Subject\":\"" + PdfPKCS7.getSubjectFields(certificate) + "\",";
-                dataToSave += "\"Digest\":\"" + getHex(digestSHA256.digest((custPk.sigAttr))) + "\",";
-                dataToSave += "\"Signature\":\"" + getHex(custPk.digest) + "\",";
-                dataToSave += "\"DocumentModified\":" + !custPk.verify() + ",";
-                dataToSave += "\"TimestampDate\":" + custPk.getTimeStampDate().getTimeInMillis() + ",";
-                dataToSave += "\"TimestampValid\":" + custPk.verifyTimestampImprint() + ",";
-                dataToSave += "\"x509Certificate\":\"" + getHex(certificate.getEncoded()) + "\"";
-
-                KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
-                Object[] fails = PdfPKCS7.verifyCertificates(pkc, kall, null, cal);
-                if (fails == null) {
-                    System.out.println("Certificates verified against the KeyStore");
-                } else {
-                    System.out.println("Certificate failed: " + fails[1]);
-                }
-                System.out.println("----------------------------------------------------");
 
 
                 dataToSave += "}";

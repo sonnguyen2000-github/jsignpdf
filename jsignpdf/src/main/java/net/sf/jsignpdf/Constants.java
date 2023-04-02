@@ -52,8 +52,7 @@ import net.sf.jsignpdf.utils.ResourceProvider;
 public class Constants {
 
     static {
-        try (InputStream is = Constants.class.getClassLoader().
-                getResourceAsStream("logging.properties")) {
+        try (InputStream is = Constants.class.getClassLoader().getResourceAsStream("logging.properties")) {
             LogManager.getLogManager().readConfiguration(is);
         } catch (IOException e) {
             e.printStackTrace();
@@ -134,13 +133,10 @@ public class Constants {
     public static final String PDF2IMAGE_JPEDAL = "jpedal";
     public static final String PDF2IMAGE_PDFBOX = "pdfbox";
     public static final String PDF2IMAGE_PDFRENDERER = "pdfrenderer";
-    public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + ","
-            + PDF2IMAGE_PDFRENDERER;
-    public static final String PDF2IMAGE_LIBRARIES = ConfigProvider.getInstance().getNotEmptyProperty("pdf2image.libraries",
-            PDF2IMAGE_LIBRARIES_DEFAULT);
+    public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + "," + PDF2IMAGE_PDFRENDERER;
+    public static final String PDF2IMAGE_LIBRARIES = ConfigProvider.getInstance().getNotEmptyProperty("pdf2image.libraries", PDF2IMAGE_LIBRARIES_DEFAULT);
 
-    public static final String DEFVAL_TSA_HASH_ALG = ConfigProvider.getInstance().getNotEmptyProperty("tsa.hashAlgorithm",
-            "SHA-1");
+    public static final String DEFVAL_TSA_HASH_ALG = ConfigProvider.getInstance().getNotEmptyProperty("tsa.hashAlgorithm", "SHA-1");
 
     /**
      * Property name.
@@ -422,6 +418,10 @@ public class Constants {
 
     public static final String ARG_FIELD_NAME = "fieldName";
 
+    public static final String ARG_REMOTE_SIGNING_URL = "remoteSigningUrl";
+
+    public static final String ARG_METADATA = "metadata";
+
     public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
 
     static {
@@ -434,8 +434,7 @@ public class Constants {
         SUPPORTED_CRITICAL_EXTENSION_OIDS = Collections.unmodifiableSet(oidSet);
 
         String version = "[UNKNOWN]";
-        try (InputStream is = Constants.class
-                .getResourceAsStream("/META-INF/maven/com.github.kwart.jsign/jsignpdf/pom.properties")) {
+        try (InputStream is = Constants.class.getResourceAsStream("/META-INF/maven/com.github.kwart.jsign/jsignpdf/pom.properties")) {
             if (is != null) {
                 Properties props = new Properties();
                 props.load(is);

@@ -144,6 +144,10 @@ public class BasicSignerOptions {
 
     public String fieldName;
 
+    public String remoteSigningUrl;
+
+    public String metadata;
+
     /**
      * Loads options from PropertyProvider
      */
@@ -195,8 +199,7 @@ public class BasicSignerOptions {
         setL4Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT));
         setImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_IMG));
         setBgImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
-        setAcro6Layers(!props.exists(Constants.PROPERTY_VISIBLE_ACRO6LAYERS)
-                || props.getAsBool(Constants.PROPERTY_VISIBLE_ACRO6LAYERS));
+        setAcro6Layers(!props.exists(Constants.PROPERTY_VISIBLE_ACRO6LAYERS) || props.getAsBool(Constants.PROPERTY_VISIBLE_ACRO6LAYERS));
 
         // TSA
         setTimestamp(props.getAsBool(Constants.PROPERTY_TSA_ENABLED));
@@ -510,8 +513,7 @@ public class BasicSignerOptions {
 
     public void setKeyIndex(final int anIndex) {
         this.keyIndex = anIndex;
-        if (keyIndex < 0)
-            keyIndex = Constants.DEFVAL_KEY_INDEX;
+        if (keyIndex < 0) keyIndex = Constants.DEFVAL_KEY_INDEX;
     }
 
     public boolean isAppend() {
@@ -519,8 +521,7 @@ public class BasicSignerOptions {
     }
 
     public boolean isAppendX() {
-        return (getPdfEncryption() == PDFEncryption.NONE)
-                && ((!Constants.DEFVAL_APPEND && advanced && append) || (Constants.DEFVAL_APPEND && (append || !advanced)));
+        return (getPdfEncryption() == PDFEncryption.NONE) && ((!Constants.DEFVAL_APPEND && advanced && append) || (Constants.DEFVAL_APPEND && (append || !advanced)));
     }
 
     public void setAppend(final boolean append) {
@@ -1271,5 +1272,21 @@ public class BasicSignerOptions {
 
     public String getFieldName() {
         return this.fieldName;
+    }
+
+    public void setRemoteSigningUrl(String url) {
+        this.remoteSigningUrl = url;
+    }
+
+    public String getRemoteSigningUrl() {
+        return this.remoteSigningUrl;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
+    public String getMetadata() {
+        return this.metadata;
     }
 }

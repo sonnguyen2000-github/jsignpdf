@@ -218,7 +218,7 @@ public class CeCA {
         if (tsaServerUrl != null) {
             LOGGER.info(RES.get("console.creatingTsaClient"));
 
-            tsc = new TSAClientBouncyCastle(tsaServerUrl, null, null, 64, "SHA512");
+            tsc = new TSAClientBouncyCastle(tsaServerUrl, basicSignerOptions.getTsaUser(), basicSignerOptions.getTsaPasswd(), 64, "SHA256");
         }
 
         byte[] encodedSignature = pdfPKCS7.getEncodedPKCS7(secondDigest, (TSAClient) tsc, null, null, MakeSignature.CryptoStandard.CMS);

@@ -277,10 +277,10 @@ public class Signer {
                 /*sonnh: attach placeholder*/
                 if (anOpts.getCertPath() != null) {
                     try {
-                        CeCAv2.attachSignaturePlaceholderAndRemoteSign(inputFile.getPath(), anOpts.getCertPath());
-//                        byte[] hashToSent = CeCAv2.attachSignaturePlaceholder(inputFile.getPath(), anOpts.getCertPath());
+//                        CeCAv2.attachSignaturePlaceholderAndRemoteSign(inputFile.getPath(), anOpts.getCertPath());
+                        byte[] hashToSent = CeCAv2.attachSignaturePlaceholder(inputFile.getPath(), anOpts.getCertPath());
                         System.out.println("Create external signature placeholder successfully");
-//                        Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.json")), hashToSent);
+                        Files.write(Paths.get(inputFile.getPath().replace(".pdf", "_hashed.json")), hashToSent);
 
                     } catch (IOException e) {
                         throw new RuntimeException(e);

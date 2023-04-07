@@ -242,6 +242,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setMetadata(line.getOptionValue(ARG_METADATA));
         }
 
+        /*sign time*/
+        if(line.hasOption(ARG_SIGN_TIME)){
+            setSignTime(line.getOptionValue(ARG_SIGN_TIME));
+        }
+
         setGui(line.hasOption(ARG_GUI));
         if (ArrayUtils.isNotEmpty(files)) {
             setInFile(files[0]);
@@ -383,6 +388,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_FIELD_NAME).withDescription("Tên ô ký. Lưu ý tên này nếu có cần đảm bảo là duy nhất").hasArg().withArgName(ARG_FIELD_NAME).create());
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_REMOTE_SIGNING_URL).withDescription("Remote signing url").hasArg().withArgName(ARG_REMOTE_SIGNING_URL).create());
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_METADATA).withDescription("Metadata").hasArg().withArgName(ARG_METADATA).create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_SIGN_TIME).withDescription("Sign time").hasArg().withArgName(ARG_SIGN_TIME).create());
     }
 
     /**

@@ -111,6 +111,9 @@ public class SignerLogic implements Runnable {
         boolean finished = false;
         Throwable tmpException = null;
         FileOutputStream fout = null;
+
+        Calendar cal = Calendar.getInstance();
+
         try {
             SSLInitializer.init(options);
 
@@ -230,6 +233,13 @@ public class SignerLogic implements Runnable {
             LOGGER.info(RES.get("console.setCertificationLevel"));
             sap.setCertificationLevel(options.getCertLevelX().getLevel());
 
+            /*set sign time*/
+            if (options.getSignTime() != null) {
+                cal.setTime(new Date(options.getSignTime()));
+            }
+
+            sap.setSignDate(cal);
+
             if (options.isVisible()) {
                 // visible signature is enabled
                 LOGGER.info(RES.get("console.configureVisible"));
@@ -335,7 +345,7 @@ public class SignerLogic implements Runnable {
                 messageDigest.update(buf, 0, n);
             }
             byte hash[] = messageDigest.digest();
-            Calendar cal = Calendar.getInstance();
+
             byte[] ocsp = null;
             if (options.isOcspEnabledX() && chain.length >= 2) {
                 LOGGER.info(RES.get("console.getOCSPURL"));
@@ -367,7 +377,7 @@ public class SignerLogic implements Runnable {
             }
 
             /*update Sign Date*/
-            sgn.setSignDate(Calendar.getInstance());
+            sgn.setSignDate(sap.getSignDate());
 
             TSAClientBouncyCastle tsc = null;
             if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {

@@ -422,6 +422,8 @@ public class Constants {
 
     public static final String ARG_METADATA = "metadata";
 
+    public static final String ARG_SIGN_TIME = "signTime";
+
     public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
 
     static {

@@ -29,6 +29,7 @@
  */
 package net.sf.jsignpdf;
 
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Locale;
@@ -147,6 +148,8 @@ public class BasicSignerOptions {
     public String remoteSigningUrl;
 
     public String metadata;
+
+    public Long signTime;
 
     /**
      * Loads options from PropertyProvider
@@ -1288,5 +1291,17 @@ public class BasicSignerOptions {
 
     public String getMetadata() {
         return this.metadata;
+    }
+
+    public void setSignTime(long signTime) {
+        this.signTime = signTime;
+    }
+
+    public void setSignTime(String signTime) {
+        this.signTime = Long.parseLong(signTime);
+    }
+
+    public Long getSignTime() {
+        return this.signTime;
     }
 }

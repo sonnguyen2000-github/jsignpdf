@@ -607,8 +607,12 @@ public class SignerLogic implements Runnable {
                     System.out.println("Signature:" + getHex(custPk.digest));
 
                     System.out.println("Document modified: " + !custPk.verify());
-                    System.out.println("Timestamp date: " + custPk.getTimeStampDate().getTimeInMillis());
-                    System.out.println("Timestamp valid: " + custPk.verifyTimestampImprint());
+
+                    if (custPk.getTimeStampToken() != null) {
+                        System.out.println("Timestamp date: " + custPk.getTimeStampDate().getTimeInMillis());
+                        System.out.println("Timestamp valid: " + custPk.verifyTimestampImprint());
+                    }
+
                     System.out.println("x509Certificate: " + getHex(certificate.getEncoded()));
                     System.out.println("Hash algorithm: " + custPk.getHashAlgorithm());
                     System.out.println("Digest algorithm: " + custPk.getDigestAlgorithm());
@@ -618,8 +622,12 @@ public class SignerLogic implements Runnable {
                     dataToSave += "\"Digest\":\"" + getHex(messageDigest.digest((custPk.sigAttr))) + "\",";
                     dataToSave += "\"Signature\":\"" + getHex(custPk.digest) + "\",";
                     dataToSave += "\"DocumentModified\":" + !custPk.verify() + ",";
-                    dataToSave += "\"TimestampDate\":" + custPk.getTimeStampDate().getTimeInMillis() + ",";
-                    dataToSave += "\"TimestampValid\":" + custPk.verifyTimestampImprint() + ",";
+
+                    if (custPk.getTimeStampToken() != null) {
+                        dataToSave += "\"TimestampDate\":" + custPk.getTimeStampDate().getTimeInMillis() + ",";
+                        dataToSave += "\"TimestampValid\":" + custPk.verifyTimestampImprint() + ",";
+                    }
+
                     dataToSave += "\"x509Certificate\":\"" + getHex(certificate.getEncoded()) + "\",";
                     dataToSave += "\"HashAlgorithm\":\"" + custPk.getHashAlgorithm() + "\",";
                     dataToSave += "\"DigestAlgorithm\":\"" + custPk.getDigestAlgorithm() + "\"";
